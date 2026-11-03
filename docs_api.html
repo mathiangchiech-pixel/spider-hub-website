@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Auth API reference (owners) · Spider Hub Docs</title><meta name="description" content="The two-request contract the loader uses."><link rel="icon" href="/logo.webp"><link rel="stylesheet" href="/docs.css"></head>
+  <body><a class="skip" href="/docs/api?focus=article">Skip navigation</a><header><a class="brand" href="/"><img src="/logo.webp" alt=""><strong>Lua<span>Secure</span></strong></a><a class="docs-label" href="/docs/getting-started">Documentation</a><a class="dashboard-link" href="/dashboard/overview">Dashboard ↗</a></header>
+  <div class="layout"><aside><details open><summary>Documentation menu</summary><nav aria-label="Documentation"><p class="nav-label">Start here</p><a href="/docs/getting-started">Run a script you bought</a><a href="/docs/loader">The loader snippet</a><a href="/docs/licenses">Your license key & device</a><a href="/docs/errors">Fix a loader error</a><p class="nav-label">Good to know</p><a href="/docs/security">Is it safe & what you share</a><p class="nav-label">For script owners</p><a href="/docs/projects">For owners: scripts, keys & limits</a><a href="/docs/security-model">Security model (owners)</a><a href="/docs/api" aria-current="page">Auth API reference (owners)</a><a href="/docs/examples">API examples (owners)</a><a href="/docs/deployment">Deployment (owners)</a><a href="/docs/migration">Migration guide (owners)</a><p class="nav-label">Product</p><a href="/docs/features">Features</a><a href="/docs/pricing">Pricing & plans</a><a href="/docs/compare-plans">Compare plans</a><a href="/docs/status">Service status</a><a href="/docs/changelog">Changelog</a><p class="nav-label">Integrations</p><a href="/docs/discord">Connect Discord</a><p class="nav-label">Company</p><a href="/docs/customer-stories">Customer stories</a><a href="/docs/about">About Spider Hub</a><a href="/docs/careers">Careers</a><a href="/docs/faq">Frequently asked questions</a><a href="/docs/press-kit">Press kit</a><p class="nav-label">Policies</p><a href="/docs/terms">Terms of service</a><a href="/docs/privacy">Privacy & data handling</a><a href="/docs/refunds">Refund policy</a><a href="/docs/dmca">Copyright & DMCA reports</a><a href="/docs/verified-scripts">Verified-script rules</a><a href="/docs/report-abuse">Report abuse</a></nav></details></aside>
+  <main id="article" tabindex="-1"><div class="eyebrow">For script owners / Documentation</div><h1>Auth API reference (owners)</h1><p class="lead">The two-request contract the loader uses.</p><article><h2>Endpoint</h2><pre><code>POST https://spiderhub.xyz/files/v4/auth
+Content-Type: application/json
+Accept: application/json</code></pre>
+    <p>This endpoint validates script access. It is not an API for creating projects or licenses. Never send Supabase service-role credentials to clients.</p>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Reference table"><table><thead><tr><th>Field</th><th>Value</th></tr></thead><tbody><tr><td><code>script</code></td><td>32-character lowercase hex file ID.</td></tr><tr><td><code>key</code></td><td>License key; empty string for keyless scripts. Maximum 256 characters.</td></tr><tr><td><code>hwid</code></td><td>Nonempty client hardware ID, maximum 256 characters. UNKNOWN-HWID is rejected.</td></tr><tr><td><code>ticket</code></td><td>Omit for the first request. Include the returned ticket for the second.</td></tr></tbody></table></div>
+    <h2>1. Request a ticket</h2><pre><code>{
+  &quot;script&quot;: &quot;YOUR_SCRIPT_FILE_ID&quot;,
+  &quot;key&quot;: &quot;YOUR_LICENSE_KEY&quot;,
+  &quot;hwid&quot;: &quot;YOUR_DEVICE_ID&quot;
+}</code></pre><p>A successful HTTP 200 response:</p><pre><code>{
+  &quot;success&quot;: true,
+  &quot;ticket&quot;: &quot;ONE_TIME_TICKET&quot;,
+  &quot;code&quot;: &quot;OK&quot;
+}</code></pre>
+    <h2>2. Exchange the ticket</h2><p>Repeat the same fields and add <code>ticket</code>. Preserve the exact key and HWID strings. The ticket is bound to those strings and the script ID, expires after two minutes, and is consumed once. Access is checked again before delivery.</p><pre><code>{
+  &quot;success&quot;: true,
+  &quot;payload&quot;: &quot;ENCODED_PAYLOAD&quot;,
+  &quot;nonce&quot;: &quot;RANDOM_NONCE&quot;,
+  &quot;sha256&quot;: &quot;SHA256_OF_DECODED_SOURCE&quot;,
+  &quot;enc&quot;: &quot;x1&quot;,
+  &quot;code&quot;: &quot;OK&quot;
+}</code></pre>
+    <p>The standard loader handles the <code>x1</code> payload format. A server with <code>LOADER_ENC=0</code> returns plain source in <code>payload</code>. Do not evaluate an API response as code.</p>
+    <h2>Failures & limits</h2><pre><code>{
+  &quot;success&quot;: false,
+  &quot;message&quot;: &quot;invalid license key&quot;,
+  &quot;code&quot;: &quot;INVALID_KEY&quot;
+}</code></pre>
+    <p>400 = malformed input, 403 = denied, 429 = rate-limited, 503 = unavailable. Inspect the JSON <code>code</code> even when HTTP is not 200. The limiter allows 60 auth requests per IP per minute per process; both exchange phases count, and a 429 includes <code>Retry-After: 60</code>.</p>
+    <p><a href="/docs/examples">See a request example</a> or <a href="/spiderhub.postman_collection.json" download>download the Postman collection</a>.</p></article><nav class="pagination" aria-label="Adjacent articles"><a href="/docs/security-model"><small>← Previous</small>Security model (owners)</a><a href="/docs/examples"><small>Next →</small>API examples (owners)</a></nav><footer>Spider Hub documentation · Auth API v4</footer></main></div><script src="/docs.js" defer></script><script type="module" src="/service-status.js"></script></body></html>

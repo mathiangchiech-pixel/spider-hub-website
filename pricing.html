@@ -1,0 +1,1653 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spider Hub — Protect, monetize &amp; manage your Lua scripts</title>
+<meta name="description" content="Spider Hub is the edge-native whitelist, licensing and monetization layer for Lua &amp; Luau script developers. 11ms median auth, 99.99% uptime, hardware locking, kill switch, key stocking, reward links and a real API." />
+<meta name="theme-color" content="#06070d" />
+<meta name="color-scheme" content="dark light" />
+<meta property="og:title" content="Spider Hub — Protect &amp; monetize your code" />
+<meta property="og:description" content="Edge-native whitelist, licensing and monetization for Lua/Luau script developers." />
+<meta property="og:type" content="website" />
+<link rel="icon" href="/logo.webp" />
+<style>
+/* ============================================================
+   Spider Hub — design system
+   No external fonts, scripts, images or fonts. Everything inline.
+   ============================================================ */
+:root{
+  --bg:#06070d; --bg-2:#090b14; --bg-3:#0d1020;
+  --ink:#eef1fa; --ink-2:#a7b0cc; --ink-3:#6f7899;
+  --line:rgba(148,163,214,.14); --line-2:rgba(148,163,214,.26);
+  --glass:rgba(255,255,255,.035); --glass-2:rgba(255,255,255,.06);
+  --blue:#ef4444; --blue-deep:#b91c1c; --cyan:#fca5a5; --mint:#34d399; --amber:#fbbf24; --rose:#fb7185;
+  --grad:linear-gradient(100deg,#f87171 0%,#ef4444 22%,#fb7185 62%,#fca5a5 100%);
+  --grad-soft:linear-gradient(140deg,rgba(59,130,246,.22),rgba(34,211,238,.14));
+  --shadow-lg:0 40px 100px -30px rgba(0,0,0,.85),0 0 0 1px rgba(148,163,214,.08) inset;
+  --shadow-glow:0 0 0 1px rgba(59,130,246,.35),0 24px 70px -24px rgba(59,130,246,.55);
+  --r-sm:10px;--r-md:14px;--r-lg:20px;--r-xl:28px;
+  --maxw:1240px;
+  --font:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"JetBrains Mono","SFMono-Regular","Cascadia Mono",Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:96px}
+body{
+  margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+  font-size:16.5px;line-height:1.6;letter-spacing:-.011em;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit;color:inherit}
+::selection{background:rgba(59,130,246,.4);color:#fff}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:6px}
+h1,h2,h3,h4{margin:0;font-weight:650;letter-spacing:-.035em;line-height:1.06}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+
+/* ---------- ambient background ---------- */
+#bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-grid{
+  position:absolute;inset:-2px;
+  background-image:linear-gradient(to right,rgba(148,163,214,.055) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(148,163,214,.055) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(ellipse 120% 78% at 50% -8%,#000 25%,transparent 72%);
+}
+.bg-aurora{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;will-change:transform}
+.a1{width:52vw;height:38vw;left:-8vw;top:-14vw;background:radial-gradient(circle,rgba(37,99,235,.75),transparent 62%);animation:drift1 22s var(--ease) infinite alternate}
+.a2{width:44vw;height:34vw;right:-6vw;top:-6vw;background:radial-gradient(circle,rgba(14,165,233,.55),transparent 62%);animation:drift2 27s var(--ease) infinite alternate}
+.a3{width:40vw;height:26vw;left:26vw;top:36vh;background:radial-gradient(circle,rgba(52,211,153,.22),transparent 64%);animation:drift1 32s var(--ease) infinite alternate-reverse}
+@keyframes drift1{to{transform:translate3d(8vw,6vh,0) scale(1.16)}}
+@keyframes drift2{to{transform:translate3d(-7vw,9vh,0) scale(1.1)}}
+.bg-noise{position:absolute;inset:0;opacity:.4;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.34'/%3E%3C/svg%3E")}
+.bg-vign{position:absolute;inset:0;background:radial-gradient(ellipse 90% 60% at 50% 0%,transparent 30%,rgba(3,4,9,.72) 100%)}
+#spot{position:fixed;width:640px;height:640px;left:0;top:0;margin:-320px 0 0 -320px;border-radius:50%;z-index:1;pointer-events:none;
+  background:radial-gradient(circle,rgba(59,130,246,.11),transparent 62%);opacity:0;transition:opacity .5s}
+body.has-cursor #spot{opacity:1}
+
+/* icons: <use> shadow content can only be styled through inheritance */
+svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.fill-icon{fill:currentColor;stroke:none}
+.fill-icon path{fill:currentColor;stroke:none}
+
+/* ---------- layout ---------- */
+.wrap{width:100%;max-width:var(--maxw);margin-inline:auto;padding-inline:24px;position:relative;z-index:2}
+section{position:relative;padding:104px 0}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-2);
+  padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:var(--glass);backdrop-filter:blur(8px)}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 0 4px rgba(52,211,153,.16);animation:pulse 2.4s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(52,211,153,0)}}
+.sec-head{max-width:760px;margin-bottom:56px}
+.sec-head.center{margin-inline:auto;text-align:center}
+h2.big{font-size:clamp(30px,4.6vw,54px);margin:18px 0 14px}
+h2.big em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{color:var(--ink-2);font-size:clamp(15.5px,1.5vw,18.5px);line-height:1.66;max-width:64ch}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mono{font-family:var(--mono)}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0;transform:translate3d(0,26px,0);transition:opacity .8s var(--ease),transform .8s var(--ease);transition-delay:var(--d,0ms)}
+.rv.in{opacity:1;transform:none}
+
+/* ---------- buttons ---------- */
+.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:13px 22px;border-radius:12px;font-weight:600;font-size:15px;letter-spacing:-.01em;
+  border:1px solid transparent;cursor:pointer;transition:transform .25s var(--ease),box-shadow .25s var(--ease),background .25s,color .25s;white-space:nowrap}
+.btn svg{width:17px;height:17px}
+.btn-primary{background:var(--grad);color:#020617;box-shadow:0 10px 34px -10px rgba(59,130,246,.7),0 0 0 1px rgba(255,255,255,.14) inset}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 46px -12px rgba(59,130,246,.85),0 0 0 1px rgba(255,255,255,.22) inset}
+.btn-ghost{background:var(--glass);border-color:var(--line-2);color:var(--ink);backdrop-filter:blur(10px)}
+.btn-ghost:hover{background:var(--glass-2);transform:translateY(-2px);border-color:rgba(148,163,214,.45)}
+.btn-sm{padding:9px 15px;font-size:13.5px;border-radius:10px}
+.btn-lg{padding:16px 28px;font-size:16.5px}
+.btn:active{transform:translateY(0) scale(.985)}
+.btn-arrow::after{content:"→";font-family:var(--font);transition:transform .25s var(--ease)}
+.btn-arrow:hover::after{transform:translateX(4px)}
+
+/* ---------- scroll progress ---------- */
+#prog{position:fixed;left:0;top:0;height:2px;width:100%;z-index:60;background:var(--grad);transform:scaleX(0);transform-origin:0 50%}
+
+/* ---------- nav ---------- */
+.nav{position:fixed;inset:0 0 auto;z-index:50;padding:14px 0;transition:background .4s,border-color .4s,backdrop-filter .4s,padding .4s;border-bottom:1px solid transparent}
+.nav.stuck{background:rgba(6,7,13,.72);backdrop-filter:blur(18px) saturate(150%);border-bottom-color:var(--line);padding:9px 0}
+.nav .wrap{display:flex;align-items:center;gap:26px;flex-wrap:nowrap}
+.logo{display:flex;align-items:center;gap:11px;font-weight:700;letter-spacing:-.045em;font-size:19.5px}
+.logo-mark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;overflow:hidden;background:#0b0e1a;border:1px solid rgba(148,163,214,.28);box-shadow:0 8px 24px -10px rgba(59,130,246,.8);flex:none;transition:transform .5s var(--ease)}
+.logo:hover .logo-mark{transform:rotate(-8deg) scale(1.07)}
+.logo-mark svg{width:19px;height:19px}
+.logo-mark img{width:100%;height:100%;object-fit:cover}
+.logo b{font-weight:700}
+.logo b span{color:var(--ink-3);font-weight:600}
+.nav-links{display:flex;align-items:center;gap:4px;margin-left:12px}
+.nav-links a{position:relative;padding:9px 13px;border-radius:9px;font-size:14.5px;color:var(--ink-2);font-weight:500;transition:color .2s,background .2s}
+.nav-links a:hover{color:var(--ink);background:var(--glass)}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto}
+.pill-live{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-2);padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--glass)}
+.pill-live i{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint);animation:pulse 2s infinite;font-style:normal}
+.burger{display:none;width:42px;height:38px;border-radius:11px;border:1px solid var(--line-2);background:var(--glass);cursor:pointer;padding:0;place-items:center}
+.burger span{display:block;width:17px;height:1.6px;background:var(--ink);border-radius:2px;transition:.35s var(--ease)}
+.burger span+span{margin-top:4.5px}
+body.menu-open .burger span:first-child{transform:translateY(6.1px) rotate(45deg)}
+body.menu-open .burger span:nth-child(2){opacity:0}
+body.menu-open .burger span:last-child{transform:translateY(-6.1px) rotate(-45deg)}
+#mmobile{position:fixed;inset:0;z-index:49;background:rgba(6,7,13,.96);backdrop-filter:blur(20px);padding:96px 24px 40px;display:none;flex-direction:column;gap:6px;opacity:0;transform:translateY(-10px);transition:.4s var(--ease);visibility:hidden;pointer-events:none}
+body.menu-open #mmobile{opacity:1;transform:none;visibility:visible;pointer-events:auto}
+#mmobile a{padding:15px 4px;border-bottom:1px solid var(--line);font-size:19px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+#mmobile a span{color:var(--ink-3);font-family:var(--mono);font-size:12px}
+#mmobile .btn{margin-top:20px}
+
+/* ---------- hero ---------- */
+.hero{padding:150px 0 96px;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,1.1fr);gap:52px;align-items:center}
+.hero h1{font-size:clamp(38px,5.6vw,68px);line-height:1.02;margin:22px 0 0}
+.hero h1 .line{display:block;overflow:hidden}
+.hero h1 .line>span{display:block;transform:translateY(105%);animation:riseIn .95s var(--ease) forwards}
+.hero h1 .line:nth-child(2)>span{animation-delay:.1s}
+.hero h1 .line:nth-child(3)>span{animation-delay:.2s}
+@keyframes riseIn{to{transform:none}}
+.hero .lede{margin-top:20px;max-width:52ch}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.hero-notes{display:flex;flex-wrap:wrap;gap:18px 26px;margin-top:26px;padding-top:22px;border-top:1px solid var(--line)}
+.hero-notes li{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink-3)}
+.hero-notes svg{width:15px;height:15px;color:var(--mint);flex:none}
+.swapword{display:inline-flex;vertical-align:top;overflow:hidden;height:1.03em}
+.swapword ul{list-style:none;margin:0;padding:0;animation:swap 9s var(--ease) infinite}
+.swapword li{height:1.03em;line-height:1.03em}
+@keyframes swap{0%,18%{transform:translateY(0)}25%,43%{transform:translateY(-100%)}50%,68%{transform:translateY(-200%)}75%,93%{transform:translateY(-300%)}100%{transform:translateY(-400%)}}
+
+/* ---------- console mock ---------- */
+.console{position:relative;border-radius:var(--r-xl);padding:1px;background:linear-gradient(150deg,rgba(59,130,246,.5),rgba(34,211,238,.22) 42%,rgba(148,163,214,.12));box-shadow:var(--shadow-lg);transform-style:preserve-3d}
+.console::before{content:"";position:absolute;inset:-42px;border-radius:60px;background:radial-gradient(60% 50% at 50% 30%,rgba(59,130,246,.3),transparent 70%);filter:blur(24px);z-index:-1}
+.console-in{background:linear-gradient(180deg,#0b0e1a,#080a13 60%);border-radius:calc(var(--r-xl) - 1px);overflow:hidden}
+.console-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+.tlights{display:flex;gap:6px}
+.tlights i{width:10px;height:10px;border-radius:50%;background:#2a3049;display:block}
+.tlights i:nth-child(1){background:#fb7185aa}.tlights i:nth-child(2){background:#fbbf24aa}.tlights i:nth-child(3){background:#34d399aa}
+.console-tab{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);padding:4px 10px;border:1px solid var(--line);border-radius:7px;background:rgba(255,255,255,.02)}
+.console-bar .sp{margin-left:auto;display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.console-body{display:grid;grid-template-columns:186px minmax(0,1fr);min-height:392px}
+.c-rail{border-right:1px solid var(--line);padding:14px 12px;background:rgba(255,255,255,.012);display:flex;flex-direction:column;gap:3px}
+.c-rail .grp{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;color:var(--ink-3);opacity:.65;margin:12px 6px 5px}
+.c-rail a{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:9px;font-size:12.8px;color:var(--ink-2);transition:.2s}
+.c-rail a svg{width:14px;height:14px;opacity:.75}
+.c-rail a:hover{background:var(--glass);color:var(--ink)}
+.c-rail a.on{background:linear-gradient(90deg,rgba(59,130,246,.22),rgba(59,130,246,.05));color:#fff;box-shadow:0 0 0 1px rgba(59,130,246,.3) inset}
+.c-main{padding:16px 18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.kpi{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:linear-gradient(160deg,rgba(255,255,255,.045),rgba(255,255,255,.012))}
+.kpi b{display:block;font-size:19px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.kpi span{font-size:10.5px;color:var(--ink-3);font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase}
+.kpi .up{color:var(--mint);font-size:11px;font-family:var(--mono)}
+.spark{border:1px solid var(--line);border-radius:12px;padding:12px 13px 6px;background:rgba(255,255,255,.02)}
+.spark-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-family:var(--mono);color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.spark svg{width:100%;height:74px;overflow:visible}
+.spark .ln{fill:none;stroke:url(#sparkg);stroke-width:2;stroke-linecap:round;stroke-dasharray:1200;stroke-dashoffset:1200;animation:draw 2.6s var(--ease) .4s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.spark .fill{fill:url(#sparkf);opacity:0;animation:fadeIn .9s ease 1.6s forwards}
+.c-split{display:grid;grid-template-columns:1.5fr 1fr;gap:9px}
+.donutcard{border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:rgba(255,255,255,.02);display:flex;align-items:center;gap:13px}
+.donutring{width:66px;height:66px;border-radius:50%;flex:none;display:grid;place-items:center;position:relative;background:conic-gradient(#34d399 0 78%,#f59e0b 78% 92%,#fb7185 92% 100%)}
+.donutring::after{content:"";position:absolute;inset:8px;border-radius:50%;background:#0b0e1a}
+.donutring span{position:relative;font-size:15px;font-weight:700;letter-spacing:-.03em}
+.donutring span i{font-size:9px;font-style:normal;color:var(--ink-3);margin-left:1px}
+.donutleg{list-style:none;margin:0;padding:0;font-size:11px;font-family:var(--mono);display:flex;flex-direction:column;gap:6px;min-width:0}
+.donutleg li{display:flex;align-items:center;gap:7px;color:var(--ink-2)}
+.donutleg i{width:8px;height:8px;border-radius:2px;flex:none}
+.donutleg b{margin-left:auto;color:var(--ink)}
+.c-brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;letter-spacing:-.02em;padding:0 6px 10px;margin-bottom:7px;border-bottom:1px solid var(--line)}
+.c-brand b{color:#f87171;font-weight:700}
+.c-logo{width:24px;height:24px;border-radius:7px;overflow:hidden;flex:none}
+.c-logo img{width:100%;height:100%;object-fit:cover}
+.c-badge{margin-left:auto;font:9px/1 var(--mono);background:rgba(59,130,246,.18);color:#93c5fd;padding:3px 6px;border-radius:5px;letter-spacing:.08em}
+.c-ws{display:flex;align-items:center;gap:8px;padding:7px 8px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:rgba(255,255,255,.02)}
+.c-ava{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#ef4444,#fca5a5);display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex:none}
+.c-ws-t b{display:block;font-size:11.5px;letter-spacing:-.01em}
+.c-ws-t small{font-size:10px;color:var(--ink-3)}
+.c-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:2px}
+.c-top-l b{font-size:16px;letter-spacing:-.02em}
+.c-top-l small{display:block;font-size:10.5px;color:var(--ink-3);margin-top:1px}
+.c-top-r{display:flex;align-items:center;gap:7px;flex:none}
+.c-chip{display:flex;align-items:center;gap:6px;font-size:10.5px;border:1px solid var(--line);border-radius:8px;padding:5px 9px;color:var(--ink-2)}
+.c-chip i{width:6px;height:6px;border-radius:50%;background:#34d399;flex:none}
+.c-chip em{color:#34d399;font-style:normal;font-weight:600}
+.c-new{font-size:10.5px;background:linear-gradient(90deg,#ef4444,#b91c1c);color:#fff;border-radius:8px;padding:6px 11px;font-weight:600;white-space:nowrap}
+.kpi{display:flex;align-items:center;gap:9px}
+.kpi-ic{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.05);display:grid;place-items:center;flex:none}
+.kpi-ic svg{width:15px;height:15px;opacity:.95}
+@keyframes fadeIn{to{opacity:1}}
+.log{border:1px solid var(--line);border-radius:12px;background:#05070f;overflow:hidden;flex:1}
+.log-head{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.log-head i{width:6px;height:6px;border-radius:50%;background:var(--rose);animation:pulse 1.4s infinite}
+.log ul{padding:9px 12px;height:132px;overflow:hidden;display:flex;flex-direction:column;gap:5px;font-family:var(--mono);font-size:11.4px;line-height:1.45}
+.log li{display:flex;gap:8px;align-items:baseline;animation:logIn .45s var(--ease)}
+@keyframes logIn{from{opacity:0;transform:translateY(7px)}}
+.log .ok{color:var(--mint)}.log .no{color:var(--rose)}.log .wt{color:var(--amber)}
+.log .t{color:#4d5573;flex:none}
+.log .m{color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.log .rt{margin-left:auto;color:#4d5573;flex:none}
+/* floating badges */
+.float{position:absolute;display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:13px;font-size:12.5px;font-weight:600;
+  background:rgba(11,14,26,.86);border:1px solid var(--line-2);backdrop-filter:blur(12px);box-shadow:0 20px 45px -18px #000;white-space:nowrap;z-index:3}
+.float svg{width:15px;height:15px}
+.f1{left:-30px;top:44%;animation:bob 6s ease-in-out infinite}
+.f2{right:-24px;top:-22px;animation:bob 7.4s ease-in-out .8s infinite}
+.f3{right:-18px;bottom:-24px;animation:bob 8.2s ease-in-out .3s infinite}
+@keyframes bob{50%{transform:translateY(-11px)}}
+
+/* ---------- marquee ---------- */
+.marq{border-block:1px solid var(--line);padding:20px 0;background:rgba(255,255,255,.014);position:relative;z-index:2;overflow:hidden}
+.marq .wrap{display:flex;align-items:center;gap:22px}
+.marq-lbl{flex:none;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);display:flex;align-items:center;gap:9px}
+.marq-lbl::after{content:"";width:26px;height:1px;background:linear-gradient(90deg,var(--line-2),transparent)}
+.marq-track{display:flex;gap:56px;width:max-content;animation:slide 34s linear infinite;will-change:transform}
+.marq:hover .marq-track{animation-play-state:paused}
+@keyframes slide{to{transform:translateX(-50%)}}
+.marq-track span{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap;transition:color .3s}
+.marq-track span:hover{color:var(--ink)}
+.marq-track svg{width:15px;height:15px;color:var(--blue);opacity:.7}
+.marq-mask{position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+
+/* ---------- stats band ---------- */
+.stats{padding:76px 0}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.stat{background:linear-gradient(180deg,rgba(13,16,32,.9),rgba(8,10,19,.9));padding:30px 26px;transition:background .35s}
+.stat:hover{background:linear-gradient(180deg,rgba(59,130,246,.1),rgba(8,10,19,.9))}
+.stat b{display:block;font-size:clamp(30px,3.4vw,44px);letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.stat span{display:block;margin-top:6px;font-size:13.5px;color:var(--ink-2)}
+.stat em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:12px}
+
+/* ---------- split / architecture ---------- */
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:60px;align-items:center}
+.checklist{display:flex;flex-direction:column;gap:16px;margin-top:26px}
+.checklist li{display:flex;gap:13px;align-items:flex-start}
+.checklist .ic{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:linear-gradient(160deg,rgba(52,211,153,.24),rgba(34,211,238,.1));border:1px solid rgba(52,211,153,.28);margin-top:1px}
+.checklist .ic svg{width:14px;height:14px;color:var(--mint)}
+.checklist h4{font-size:15.5px;margin-bottom:2px;letter-spacing:-.02em}
+.checklist p{font-size:14px;color:var(--ink-2);line-height:1.55}
+/* map */
+.mapbox{position:relative;border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;background:radial-gradient(120% 90% at 50% 0%,rgba(59,130,246,.12),rgba(5,7,15,.5));overflow:hidden}
+.mapbox .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{font-family:var(--mono);font-size:11px;letter-spacing:.06em;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--ink-2);display:inline-flex;gap:7px;align-items:center}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.chip.g i{background:var(--mint);box-shadow:0 0 8px var(--mint)}
+.chip.a i{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+#mapsvg .land{fill:rgba(148,163,214,.09);stroke:rgba(148,163,214,.16);stroke-width:.5}
+#mapsvg .hit{fill:transparent}
+#mapsvg .pin{fill:var(--cyan)}
+#mapsvg .ring{fill:none;stroke:var(--cyan);stroke-width:1.1;transform-box:fill-box;transform-origin:center;animation:ping 3.2s ease-out infinite}
+#mapsvg .ring.d2{animation-delay:1.1s;stroke:var(--mint)}
+@keyframes ping{0%{transform:scale(.35);opacity:.85}70%{transform:scale(2.8);opacity:.06}100%{transform:scale(3);opacity:0}}
+#mapsvg .arc{fill:none;stroke:url(#arcg);stroke-width:1.1;stroke-dasharray:3 5;opacity:.55;animation:dash 22s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-160}}
+#mapsvg text{font-family:var(--mono);font-size:9.4px;fill:#c3cbe8;letter-spacing:.06em;stroke:rgba(6,7,13,.92);stroke-width:3.4px;paint-order:stroke fill;stroke-linejoin:round}
+
+/* ---------- steps ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
+.step{position:relative;padding:26px 24px 24px;border-radius:var(--r-lg);border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));overflow:hidden;transition:transform .5s var(--ease),border-color .4s}
+.step:hover{transform:translateY(-5px);border-color:rgba(59,130,246,.4)}
+.step::after{content:"";position:absolute;inset:0;background:radial-gradient(320px 160px at var(--mx,50%) var(--my,0%),rgba(59,130,246,.18),transparent 70%);opacity:0;transition:opacity .4s}
+.step:hover::after{opacity:1}
+.step .num{counter-increment:s;font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--blue);display:block;margin-bottom:16px}
+.step .num::before{content:"0" counter(s)}
+.step h3{font-size:19px;margin-bottom:8px}
+.step p{font-size:14.3px;color:var(--ink-2)}
+
+/* ---------- code tabs ---------- */
+.code{border:1px solid var(--line);border-radius:var(--r-lg);background:#05070f;overflow:hidden;box-shadow:var(--shadow-lg)}
+.code-tabs{display:flex;align-items:center;gap:4px;padding:9px 10px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+.code-tabs [role=tab]{padding:7px 13px;border-radius:8px;border:1px solid transparent;background:none;font-family:var(--mono);font-size:12px;color:var(--ink-3);cursor:pointer;transition:.22s}
+.code-tabs [role=tab]:hover{color:var(--ink-2);background:var(--glass)}
+.code-tabs [role=tab][aria-selected=true]{color:#fff;background:rgba(59,130,246,.18);border-color:rgba(59,130,246,.36)}
+.code-tabs .copy{margin-left:auto;display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--ink-3);border:1px solid var(--line);padding:6px 11px;border-radius:8px;background:none;cursor:pointer;transition:.22s}
+.code-tabs .copy:hover{color:var(--ink);border-color:var(--line-2);background:var(--glass)}
+.code pre{margin:0;padding:20px 22px;overflow:auto;font-family:var(--mono);font-size:13px;line-height:1.75;tab-size:2}
+.code [role=tabpanel][hidden]{display:none}
+.code-split{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+.tok-k{color:#93c5fd}.tok-s{color:#7dd3fc}.tok-c{color:#4d5573;font-style:italic}.tok-n{color:#fbbf24}.tok-f{color:#34d399}.tok-a{color:#a5b4fc}
+
+/* ---------- features ---------- */
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.fcard{position:relative;padding:26px;border-radius:var(--r-lg);border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.042),rgba(255,255,255,.012));overflow:hidden;transition:transform .5s var(--ease),border-color .45s,background .45s}
+.fcard:hover{transform:translateY(-6px);border-color:rgba(148,163,214,.34)}
+.fcard::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .45s;background:radial-gradient(400px 200px at var(--mx,50%) var(--my,50%),rgba(59,130,246,.2),transparent 68%)}
+.fcard:hover::before{opacity:1}
+.fcard>*{position:relative}
+.ficon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;margin-bottom:17px;border:1px solid rgba(148,163,214,.22);background:linear-gradient(155deg,rgba(59,130,246,.24),rgba(34,211,238,.1));transition:transform .5s var(--ease),box-shadow .4s}
+.ficon svg{width:21px;height:21px;color:#bfdbfe}
+.fcard:hover .ficon{transform:scale(1.08) rotate(-6deg);box-shadow:0 12px 30px -12px rgba(59,130,246,.9)}
+.fcard h3{font-size:17.5px;margin-bottom:8px}
+.fcard p{font-size:14.2px;color:var(--ink-2);line-height:1.6}
+.fcard .tag{position:absolute;top:20px;right:20px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:4px 8px;border-radius:6px;background:rgba(52,211,153,.13);border:1px solid rgba(52,211,153,.3);color:#8af0c6}
+.fcard .tag.b{background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.3);color:#fde68a}
+.fcard.wide{grid-column:span 2}
+.fcard .mock{margin-top:18px;border:1px solid var(--line);border-radius:12px;background:#05070f;padding:14px;font-family:var(--mono);font-size:11.6px;color:var(--ink-2);overflow:hidden}
+.fcard .mock b{color:#fff;font-weight:600}
+/* key inventory bar mock */
+.meter{height:7px;border-radius:99px;background:rgba(148,163,214,.14);overflow:hidden;margin:7px 0 2px}
+.meter i{display:block;height:100%;border-radius:99px;background:var(--grad);width:0;transition:width 1.5s var(--ease) .2s}
+.rv.in .meter i{width:var(--w,60%)}
+.mrow{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+
+/* ---------- auth playground ---------- */
+.play{border:1px solid var(--line);border-radius:var(--r-xl);background:linear-gradient(180deg,rgba(13,16,32,.75),rgba(6,7,13,.75));overflow:hidden;box-shadow:var(--shadow-lg)}
+.play-bar{display:flex;flex-wrap:wrap;gap:6px;padding:14px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+.seg{display:flex;flex-wrap:wrap;gap:5px;padding:4px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.3);flex:1}
+.seg button{border:0;background:none;padding:8px 12px;border-radius:9px;font-family:var(--mono);font-size:11.6px;letter-spacing:.02em;color:var(--ink-3);cursor:pointer;transition:.22s;white-space:nowrap}
+.seg button:hover{color:var(--ink);background:var(--glass)}
+.seg button[aria-pressed=true]{color:#fff;background:linear-gradient(180deg,rgba(59,130,246,.34),rgba(59,130,246,.14));box-shadow:0 0 0 1px rgba(59,130,246,.45) inset}
+.play-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.play-col{padding:20px 22px;min-width:0}
+.play-col+.play-col{border-left:1px solid var(--line);background:rgba(0,0,0,.22)}
+.play-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);margin-bottom:11px}
+.pipe{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+.pipe li{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.02);font-size:13px;color:var(--ink-3);transition:.4s var(--ease)}
+.pipe li .st{flex:none;width:19px;height:19px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;transition:.4s}
+.pipe li .st svg{grid-area:1/1;width:11px;height:11px;opacity:0;transform:scale(.4);transition:.3s var(--ease)}
+.pipe li .ms{margin-left:auto;font-family:var(--mono);font-size:11px;opacity:0;transition:.4s}
+.pipe li.pass{color:var(--ink);border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.07)}
+.pipe li.pass .st{background:var(--mint);border-color:var(--mint);color:#04160e}
+.pipe li.pass .st svg:first-child{opacity:1;transform:none}
+.pipe li.pass .ms{opacity:1;color:var(--mint)}
+.pipe li.fail{color:#ffdfe4;border-color:rgba(251,113,133,.42);background:rgba(251,113,133,.09)}
+.pipe li.fail .st{background:var(--rose);border-color:var(--rose);color:#2a0710}
+.pipe li.fail .st svg:last-child{opacity:1;transform:none}
+.pipe li.fail .ms{opacity:1;color:#ffb4c0}
+.pipe li.skip{opacity:.45}
+.res{font-family:var(--mono);font-size:12.6px;line-height:1.8;white-space:pre-wrap;word-break:break-word;margin:0;max-height:340px;overflow:auto}
+.res .k{color:#93a0c8}.res .s{color:#7dd3fc}.res .n{color:#fbbf24}.res .b{color:#a5b4fc}
+.verdict{display:flex;align-items:center;gap:11px;padding:12px 14px;border-radius:12px;margin-bottom:14px;border:1px solid;font-size:13.4px;font-weight:600;animation:logIn .4s var(--ease)}
+.verdict.ok{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.34);color:#a7f3d0}
+.verdict.no{background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.36);color:#fecdd3}
+.verdict code{font-family:var(--mono);font-size:11.6px;background:rgba(0,0,0,.35);padding:3px 7px;border-radius:6px;color:#fff;margin-left:auto;white-space:nowrap}
+.verdict svg{width:17px;height:17px;flex:none}
+
+/* ---------- comparison ---------- */
+.cmp{border:1px solid var(--line);border-radius:var(--r-lg);overflow:auto;background:rgba(255,255,255,.015)}
+.cmp table{width:100%;border-collapse:collapse;min-width:720px;font-size:14px}
+.cmp thead th{position:sticky;top:0;background:rgba(9,11,20,.97);text-align:left;padding:16px 18px;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono);color:var(--ink-3);border-bottom:1px solid var(--line);font-weight:500}
+.cmp thead th.hi{color:#fff;background:rgba(12,22,46,.97)}
+.cmp tbody td{padding:14px 18px;border-bottom:1px solid rgba(148,163,214,.08);color:var(--ink-2);vertical-align:middle}
+.cmp tbody tr:last-child td{border-bottom:0}
+.cmp tbody tr:hover td{background:rgba(59,130,246,.05)}
+.cmp td.name{color:var(--ink);font-weight:550}
+.cmp td.hi{color:#fff;background:rgba(59,130,246,.07);font-weight:600}
+.cmp td .y{color:var(--mint)}
+.cmp td .n{color:var(--ink-3)}
+
+/* ---------- pricing ---------- */
+.price-head{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between;margin-bottom:40px}
+.toggle{display:inline-flex;align-items:center;gap:4px;padding:5px;border-radius:13px;border:1px solid var(--line);background:rgba(0,0,0,.3);font-family:var(--mono);font-size:12px}
+.toggle button{border:0;background:none;padding:9px 15px;border-radius:9px;color:var(--ink-3);cursor:pointer;transition:.25s;font-weight:500}
+.toggle button[aria-pressed=true]{color:#fff;background:linear-gradient(180deg,rgba(59,130,246,.36),rgba(59,130,246,.12));box-shadow:0 0 0 1px rgba(59,130,246,.45) inset}
+.toggle .save{color:var(--mint);padding-left:2px}
+.tiers{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:start}
+.tier{position:relative;padding:26px 22px;border-radius:var(--r-lg);border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));display:flex;flex-direction:column;transition:transform .5s var(--ease),border-color .4s,box-shadow .5s}
+.tier:hover{transform:translateY(-6px);border-color:rgba(148,163,214,.4)}
+.tier.pop{border-color:rgba(59,130,246,.5);background:linear-gradient(180deg,rgba(59,130,246,.15),rgba(13,16,32,.7));box-shadow:var(--shadow-glow)}
+.tier .flag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9.6px;letter-spacing:.16em;text-transform:uppercase;padding:5px 11px;border-radius:999px;background:var(--grad);color:#020617;font-weight:700;white-space:nowrap}
+.tier h3{font-size:16px;letter-spacing:.02em}
+.tier .desc{font-size:12.9px;color:var(--ink-3);margin-top:7px;min-height:40px;line-height:1.45}
+.amt{display:flex;align-items:baseline;gap:5px;margin:14px 0 2px}
+.amt .cur{font-size:18px;color:var(--ink-2);font-weight:600}
+.amt .v{font-size:42px;font-weight:650;letter-spacing:-.05em;font-variant-numeric:tabular-nums;transition:opacity .18s}
+.amt .v.flip{opacity:0}
+.amt .per{font-size:13px;color:var(--ink-3);font-family:var(--mono)}
+.billed{font-size:11.5px;color:var(--mint);font-family:var(--mono);min-height:18px;margin-bottom:14px}
+.tier ul{display:flex;flex-direction:column;gap:9px;margin:16px 0 20px;padding-top:16px;border-top:1px solid var(--line);flex:1}
+.tier li{display:flex;gap:9px;font-size:13.3px;color:var(--ink-2);line-height:1.45}
+.tier li svg{width:15px;height:15px;flex:none;margin-top:2.5px}
+.tier li.on svg{color:var(--mint)}
+.tier li.off{color:var(--ink-3)}
+.tier li.off svg{color:#454d6d}
+.tier li b{color:#fff;font-weight:600}
+.tier .btn{width:100%}
+.pay{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:34px;align-items:center}
+.pay span{font-size:12.5px;color:var(--ink-3);font-family:var(--mono);letter-spacing:.06em}
+.pay-notes{grid-template-columns:repeat(3,1fr)}
+
+/* ---------- testimonials ---------- */
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.quote{margin:0;padding:24px;border-radius:var(--r-lg);border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.042),rgba(255,255,255,.012));transition:transform .5s var(--ease),border-color .4s}
+.quote:hover{transform:translateY(-5px);border-color:rgba(148,163,214,.36)}
+.quote .stars{display:flex;gap:3px;margin-bottom:14px;color:var(--amber)}
+.quote .stars svg{width:13px;height:13px}
+.quote p{font-size:14.6px;color:var(--ink);line-height:1.62}
+.quote footer{display:flex;align-items:center;gap:11px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.ava{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:12.5px;font-weight:700;font-family:var(--mono);color:#020617;background:var(--grad)}
+.quote .who b{display:block;font-size:13.4px;font-weight:600}
+.quote .who span{font-size:11.8px;color:var(--ink-3);font-family:var(--mono)}
+.quote .who{display:flex;flex-direction:column}
+.quote .plat{margin-left:auto;font-family:var(--mono);font-size:10.4px;color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:3px 7px}
+
+/* ---------- FAQ ---------- */
+.faq{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 22px;align-items:start}
+details{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.022);transition:background .3s,border-color .3s;overflow:hidden}
+details[open]{background:rgba(59,130,246,.06);border-color:rgba(59,130,246,.3)}
+summary{display:flex;align-items:center;gap:14px;padding:17px 19px;cursor:pointer;font-weight:600;font-size:15px;list-style:none;letter-spacing:-.015em}
+summary::-webkit-details-marker{display:none}
+summary .q{flex:none;font-family:var(--mono);font-size:11px;color:var(--blue);letter-spacing:.1em}
+summary .pm{margin-left:auto;flex:none;width:22px;height:22px;border-radius:7px;border:1px solid var(--line-2);display:grid;place-items:center;position:relative;transition:.35s var(--ease)}
+summary .pm::before,summary .pm::after{content:"";position:absolute;background:var(--ink-2);border-radius:2px;transition:.35s var(--ease)}
+summary .pm::before{width:10px;height:1.6px}
+summary .pm::after{width:1.6px;height:10px}
+details[open] summary .pm{background:var(--grad);border-color:transparent;transform:rotate(90deg)}
+details[open] summary .pm::before{background:#020617}
+details[open] summary .pm::after{opacity:0}
+details .a{padding:0 19px 19px 52px;font-size:14.2px;color:var(--ink-2);line-height:1.65}
+details .a code{font-family:var(--mono);font-size:12.4px;background:rgba(0,0,0,.4);padding:2px 6px;border-radius:5px;color:#a5f3fc;border:1px solid var(--line)}
+
+/* ---------- final CTA ---------- */
+.cta{padding:0}
+.cta-box{position:relative;border-radius:var(--r-xl);padding:64px 48px;text-align:center;overflow:hidden;
+  background:linear-gradient(150deg,rgba(59,130,246,.2),rgba(34,211,238,.08) 55%,rgba(13,16,32,.6));
+  border:1px solid rgba(59,130,246,.32);box-shadow:var(--shadow-lg)}
+.cta-box::before{content:"";position:absolute;inset:0;background-image:linear-gradient(to right,rgba(148,163,214,.07) 1px,transparent 1px),linear-gradient(to bottom,rgba(148,163,214,.07) 1px,transparent 1px);background-size:44px 44px;mask-image:radial-gradient(ellipse 70% 80% at 50% 110%,#000,transparent 70%)}
+.cta-box h2{font-size:clamp(28px,4.2vw,48px);position:relative}
+.cta-box p{position:relative;margin:16px auto 0;max-width:56ch;color:var(--ink-2)}
+.cta-box .hero-cta{justify-content:center;position:relative}
+
+/* ---------- footer ---------- */
+footer.site{border-top:1px solid var(--line);padding:60px 0 34px;margin-top:96px;background:rgba(4,5,11,.6);position:relative;z-index:2}
+.fgrid2{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4,minmax(0,1fr));gap:38px}
+.fbrand p{font-size:13.6px;color:var(--ink-3);margin-top:14px;max-width:34ch;line-height:1.6}
+.fcol h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin-bottom:14px;font-weight:500}
+.fcol a{display:block;font-size:13.8px;color:var(--ink-2);padding:5px 0;transition:color .2s,transform .2s}
+.fcol a:hover{color:#fff;transform:translateX(3px)}
+.fbot{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:44px;padding-top:22px;border-top:1px solid var(--line);font-size:12.4px;color:var(--ink-3)}
+.fbot .status{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border-radius:999px;border:1px solid rgba(52,211,153,.3);background:rgba(52,211,153,.07);color:#8af0c6;font-family:var(--mono);font-size:11px}
+.fbot .status i{width:6px;height:6px;border-radius:50%;background:var(--mint);box-shadow:0 0 8px var(--mint);animation:pulse 2s infinite}
+.fbot .socials{margin-left:auto;display:flex;gap:8px}
+.fbot .socials a{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;color:var(--ink-3);transition:.25s}
+.fbot .socials a:hover{color:#fff;border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.14);transform:translateY(-2px)}
+.fbot .socials svg{width:15px;height:15px}
+.disc{font-size:11.6px;color:#5a6284;margin-top:18px;line-height:1.55;max-width:76ch}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,26px);z-index:80;padding:11px 18px;border-radius:12px;background:rgba(11,14,26,.94);border:1px solid rgba(52,211,153,.4);backdrop-filter:blur(12px);
+  font-size:13.4px;font-weight:600;display:flex;gap:10px;align-items:center;opacity:0;pointer-events:none;transition:.4s var(--ease);box-shadow:0 20px 50px -20px #000}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast svg{width:16px;height:16px;color:var(--mint)}
+
+/* ---------- svg stroke hygiene (icons inherit stroke; shapes must not) ---------- */
+#mapdots rect,#mapsvg .pin,#mapsvg .hit,.spark .fill,.logo-mark svg path,.fbot .socials svg path{stroke:none}
+#mapsvg .hit{fill:transparent}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  .tiers{grid-template-columns:repeat(2,1fr)}
+  .fgrid{grid-template-columns:repeat(2,1fr)}
+  .fcard.wide{grid-column:span 2}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .fgrid2{grid-template-columns:minmax(0,1.4fr) repeat(2,minmax(0,1fr));gap:30px}
+}
+@media (max-width:1180px){.pill-live{display:none}}
+@media (max-width:980px){
+  .nav-links{display:none}
+  .nav .wrap{gap:12px}
+  .nav-right{gap:8px;margin-left:auto;flex:none}
+  .nav-right .btn-ghost{display:none}
+  .nav-right .btn{font-size:13px;padding:9px 12px}
+  .burger{display:grid;flex:none}
+  #mmobile{display:flex}
+  .hero-grid{grid-template-columns:1fr;gap:44px}
+  .hero{padding:130px 0 70px}
+  .split{grid-template-columns:1fr;gap:38px}
+  .play-grid{grid-template-columns:1fr}
+  .play-col+.play-col{border-left:0;border-top:1px solid var(--line)}
+  .steps{grid-template-columns:1fr}
+  .quotes{grid-template-columns:1fr}
+  .faq{grid-template-columns:1fr}
+  .code-split,.pay-notes{grid-template-columns:1fr}
+  section{padding:78px 0}
+  .console-body{grid-template-columns:1fr}
+  .c-rail{display:none}
+  .c-split{grid-template-columns:1fr}
+  .float{display:none}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .eyebrow{font-size:10px;letter-spacing:.12em;padding:6px 10px;gap:7px}
+  .code-tabs{flex-wrap:wrap;row-gap:8px}
+  .code-tabs [role=tab]{padding:6px 10px;font-size:11px}
+  .code-tabs .copy{padding:6px 10px}
+  .code pre{font-size:11.6px;padding:15px 14px;line-height:1.65}
+  .play-col{padding:16px 15px}
+  .pipe li{font-size:12.3px;padding:8px 10px}
+  .res{font-size:11.6px}
+  .wrap{padding-inline:18px}
+  .tiers{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  .fcard.wide{grid-column:span 1}
+  .stats-grid{grid-template-columns:1fr}
+  .fgrid2{grid-template-columns:1fr 1fr}
+  .cta-box{padding:44px 22px}
+  .hero h1{font-size:34px}
+  .kpis{grid-template-columns:1fr 1fr}
+  .kpi:last-child{display:none}
+  .btn{width:100%}
+  .hero-cta{flex-direction:column}
+  .price-head{flex-direction:column;align-items:flex-start}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+  html{scroll-behavior:auto}
+  .rv{opacity:1!important;transform:none!important}
+  .hero h1 .line>span{transform:none}
+  .spark .ln{stroke-dashoffset:0}
+}
+@media print{.nav,#bgfx,.marq{display:none}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.6 4.6 4.6L19 7.2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.4 6.4 17.6 17.6M17.6 6.4 6.4 17.6"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 5 5.7v6.1c0 4.4 2.9 7.3 7 8.8 4.1-1.5 7-4.4 7-8.8V5.7z"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3 5 5.7v6.1c0 4.4 2.9 7.3 7 8.8 4.1-1.5 7-4.4 7-8.8V5.7z"/><path d="m9 12 2.2 2.2L15.4 10"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8.2" cy="8.4" r="3.4"/><path d="m10.7 10.9 8 8M15.2 15.4l2-2M18.2 18.4l2.2-2.2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.4" y="10.4" width="15.2" height="9.6" rx="2.4"/><path d="M8 10.4V7.8a4 4 0 0 1 8 0v2.6"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8.4 16.4v-4M12.6 16.4V8.2M16.8 16.4v-6"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8.2" width="16" height="11.6" rx="3.4"/><path d="M12 4.2v4M8.6 13h.01M15.4 13h.01M9.4 16.6h5.2M2.4 12v3.4M21.6 12v3.4"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5.4M15 3v5.4M6.8 8.4h10.4v3.4a5.2 5.2 0 0 1-10.4 0zM12 17V21"/></symbol>
+  <symbol id="i-vault" viewBox="0 0 24 24"><ellipse cx="12" cy="6.4" rx="7.2" ry="2.9"/><path d="M4.8 6.4v11.2c0 1.6 3.2 2.9 7.2 2.9s7.2-1.3 7.2-2.9V6.4"/><path d="M4.8 12c0 1.6 3.2 2.9 7.2 2.9s7.2-1.3 7.2-2.9"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M14.6 9.3a2.8 2.8 0 0 0-4.7 1c-.6 1.5.6 2.3 2.3 2.7 1.7.5 2.9 1.2 2.4 2.8a2.8 2.8 0 0 1-4.6.8M12 6.6v2M12 15.4v2"/></symbol>
+  <symbol id="i-webhook" viewBox="0 0 24 24"><circle cx="7" cy="15" r="3.1"/><circle cx="17.4" cy="17.2" r="3.1"/><path d="M9.7 13.2 13 8.4M10 16.7h4.5"/><path d="M15.8 10.5a3.2 3.2 0 1 1 3-4.6"/><path d="M16.6 9.3 14.6 7"/></symbol>
+  <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3.6v8.2"/><path d="M7.2 7.2a7.4 7.4 0 1 0 9.6 0"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M3.4 12h17.2"/><path d="M12 3.4c2.3 2.5 3.5 5.4 3.5 8.6S14.3 18.2 12 20.6c-2.3-2.4-3.5-5.5-3.5-8.6S9.7 5.9 12 3.4z"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.6 3 6.2 13.4h4.6L9.9 21l7.6-10.6h-4.7z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 7.2V12l3.4 2.1"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2.4"/><path d="M15.4 5.6A2.6 2.6 0 0 0 13 4H6.6A2.6 2.6 0 0 0 4 6.6V13a2.6 2.6 0 0 0 1.6 2.4"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.6 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8L3.6 9.7l5.8-.8z"/></symbol>
+  <symbol id="i-finger" viewBox="0 0 24 24"><path d="M12 3.6a8.4 8.4 0 0 0-8.4 8.4v2M12 3.6A8.4 8.4 0 0 1 20.4 12v4.6M7.6 12a4.4 4.4 0 0 1 8.8 0v6M12 12v8.4M4.4 16.4c.8-1.2 1.4-2.6 1.4-4.4M19.6 20c.5-1 .8-2.2.8-3.4"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3.2 8.4 4.3L12 11.8 3.6 7.5z"/><path d="m3.6 12.4 8.4 4.3 8.4-4.3M3.6 16.9l8.4 4.3 8.4-4.3"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3.4H7.4a2 2 0 0 0-2 2v13.2a2 2 0 0 0 2 2h9.2a2 2 0 0 0 2-2V8.2z"/><path d="M14 3.4v4.8h4.6M8.6 13h6.8M8.6 16.6h4.6"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9.2" cy="8.2" r="3.3"/><path d="M3.6 19.2a5.6 5.6 0 0 1 11.2 0"/><path d="M16.2 5.2a3.3 3.3 0 0 1 0 6M18.6 19.2a5.6 5.6 0 0 0-1.8-4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.4"/><path d="m15.8 15.8 4.6 4.6"/></symbol>
+  <symbol id="i-terminal" viewBox="0 0 24 24"><path d="m5 8 4 4-4 4M12.4 16.4H19"/></symbol>
+  <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M5.2 15c-1 2-.7 4.2-.7 4.2s2.2.3 4.2-.7M14.4 4.6c3-1 5.4-.6 5.4-.6s.4 2.4-.6 5.4c-1.3 3.7-4.8 6.3-7.3 7.7l-4.2-4.2C8.4 10.4 10.9 6.9 14.4 4.6z"/><circle cx="14.8" cy="9.2" r="1.4"/></symbol>
+  <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6.4" y="6.4" width="11.2" height="11.2" rx="2.2"/><rect x="9.8" y="9.8" width="4.4" height="4.4" rx="1"/><path d="M10 3.4v3M14 3.4v3M10 17.6v3M14 17.6v3M3.4 10h3M3.4 14h3M17.6 10h3M17.6 14h3"/></symbol>
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M9.3 20.3c-4 1.2-4-2.1-5.6-2.6m11.2 4.6v-3.4c0-1 .1-1.4-.5-2 2.3-.3 4.4-1.1 4.4-4.9a3.8 3.8 0 0 0-1.1-2.6 3.5 3.5 0 0 0-.1-2.7s-.9-.3-2.9 1a9.7 9.7 0 0 0-5 0c-2-1.3-2.9-1-2.9-1a3.5 3.5 0 0 0-.1 2.7 3.8 3.8 0 0 0-1.1 2.6c0 3.8 2.1 4.6 4.4 4.9-.6.6-.6 1.2-.5 2v3.4"/></symbol>
+  <symbol id="i-discord" viewBox="0 0 24 24"><path d="M8.6 6.6a13.4 13.4 0 0 1 6.8 0l1.5.9c1.9 2.3 2.5 5.4 2.3 8.3a11 11 0 0 1-4.2 2l-.8-1.5c.7-.3 1.3-.6 1.8-1.1-3.3 1.4-6.4 1.4-9.7 0 .5.5 1.1.8 1.8 1.1l-.8 1.5a11 11 0 0 1-4.2-2c-.2-2.9.4-6 2.3-8.3z"/><path d="M9.6 13.1h.01M14.4 13.1h.01"/></symbol>
+  <symbol id="i-x-social" viewBox="0 0 24 24"><path d="M4.4 4.4h3.4l4.2 5.7 5-5.7h2l-5.9 6.7 6.3 8.5h-3.4l-4.5-6.1-5.3 6.1H4.2l6.2-7.1z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3.4" y="5.4" width="17.2" height="13.2" rx="2.4"/><path d="m4.4 7.4 7.6 5 7.6-5"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.4 13.6 9l5.6 1.6-5.6 1.6L12 17.8l-1.6-5.6L4.8 10.6 10.4 9z"/><path d="M18.6 15.6l.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7z"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10.4 13.6a3.6 3.6 0 0 0 5.4.4l2.4-2.4a3.6 3.6 0 0 0-5.1-5.1l-1.4 1.4"/><path d="M13.6 10.4a3.6 3.6 0 0 0-5.4-.4L5.8 12.4a3.6 3.6 0 0 0 5.1 5.1l1.4-1.4"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-8.4 8.4"/><path d="M18 14v4.4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4.4"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 5.4v5H15M4 18.6v-5h5"/><path d="M19.2 10.4a7.6 7.6 0 0 0-13.1-3.2M4.8 13.6a7.6 7.6 0 0 0 13.1 3.2"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8.6 8-4.6 4 4.6 4M15.4 8l4.6 4-4.6 4M13.6 4.6l-3.2 14.8"/></symbol>
+  <g id="ico-stroke" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></g>
+</defs></svg>
+
+<div id="bgfx" aria-hidden="true">
+  <div class="bg-grid"></div>
+  <div class="bg-aurora a1"></div><div class="bg-aurora a2"></div><div class="bg-aurora a3"></div>
+  <canvas id="dust" style="position:absolute;inset:0;width:100%;height:100%;opacity:.5"></canvas>
+  <div class="bg-noise"></div><div class="bg-vign"></div>
+</div>
+<div id="spot" aria-hidden="true"></div>
+<div id="prog" aria-hidden="true"></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Spider Hub home">
+      <span class="logo-mark" aria-hidden="true">
+        <img src="/logo.webp" alt="Spider Hub" />
+      </span>
+      <b>Lua<span>Secure</span></b>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/features">Features</a>
+      <a href="/how-it-works">How it works</a>
+      <a href="/auth-api">Auth API</a>
+      <a href="/compare">Compare</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/faq">FAQ</a>
+    </nav>
+    <div class="nav-right">
+      <span class="pill-live" title="Live status"><i></i> ALL SYSTEMS OPERATIONAL</span>
+      <a class="btn btn-ghost btn-sm" href="/docs/getting-started"><svg aria-hidden="true"><use href="#i-doc"/></svg>Docs</a>
+      <a class="btn btn-primary btn-sm" href="/dashboard">Open dashboard<svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="burger" id="burger" aria-label="Menu" aria-expanded="false" aria-controls="mmobile"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<nav id="mmobile" aria-label="Mobile">
+  <a href="/features">Features <span>01</span></a>
+  <a href="/how-it-works">How it works <span>02</span></a>
+  <a href="/auth-api">Auth API <span>03</span></a>
+  <a href="/compare">Compare <span>04</span></a>
+  <a href="/pricing">Pricing <span>05</span></a>
+  <a href="/faq">FAQ <span>06</span></a>
+  <a href="/docs/getting-started">Docs <span>↗</span></a>
+  <a class="btn btn-primary" href="/dashboard">Open dashboard</a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<main id="top">
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow"><i class="dot"></i> Edge auth v3 · 11&nbsp;ms p50 · 41 regions</span>
+      <h1>
+        <span class="line"><span>Protect,</span></span>
+        <span class="line"><span>monetize &amp;</span></span>
+        <span class="line"><span>
+          <span class="swapword"><ul>
+            <li class="grad-text">ship.</li><li class="grad-text">scale.</li><li class="grad-text">defend.</li><li class="grad-text">automate.</li><li class="grad-text">ship.</li>
+          </ul></span>
+        </span></span>
+      </h1>
+      <p class="lede">Spider Hub is the whitelist, licensing and revenue layer for Lua &amp; Luau script developers. Upload your source once — we embed hardware-locked auth, obfuscate it, and hand you a dashboard, Discord bot, key API and kill switch that never blinks during a launch&nbsp;day.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="/register"><svg aria-hidden="true"><use href="#i-rocket"/></svg>Start 14-day trial</a>
+        <a class="btn btn-ghost btn-lg" href="/auth-api"><svg aria-hidden="true"><use href="#i-terminal"/></svg>Try the auth API</a>
+      </div>
+      <ul class="hero-notes">
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg>No card required</li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg>Drop-in loader, 1 line</li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg>99.99% uptime SLA</li>
+        <li><svg aria-hidden="true"><use href="#i-check"/></svg>Cancel &amp; stack anytime</li>
+      </ul>
+    </div>
+
+    <div style="position:relative">
+      <div class="console" id="tilt">
+        <div class="console-in">
+          <div class="console-body">
+            <aside class="c-rail" aria-hidden="true">
+              <div class="c-brand"><span class="c-logo"><img src="/logo.webp" alt=""></span>Lua<b>Secure</b><span class="c-badge">FREE</span></div>
+              <div class="c-ws"><span class="c-ava">A</span><div class="c-ws-t"><b>altacc's workspace</b><small>Free plan</small></div></div>
+              <span class="grp">WORKSPACE</span>
+              <a class="on"><svg><use href="#i-chart"/></svg>Overview</a>
+              <a><svg><use href="#i-vault"/></svg>Projects</a>
+              <a><svg><use href="#i-layers"/></svg>Scripts</a>
+              <a><svg><use href="#i-key"/></svg>License keys</a>
+              <a><svg><use href="#i-users"/></svg>Players</a>
+              <a><svg><use href="#i-webhook"/></svg>Send Panel</a>
+              <span class="grp">SECURITY</span>
+              <a><svg><use href="#i-power"/></svg>Blacklist</a>
+              <span class="grp">INSIGHTS</span>
+              <a><svg><use href="#i-chart"/></svg>Analytics</a>
+            </aside>
+            <div class="c-main">
+              <div class="c-top">
+                <div class="c-top-l"><b>Overview</b><small>Your scripts, keys and players at a glance</small></div>
+                <div class="c-top-r"><span class="c-chip"><i></i>Discord <em>Linked</em></span><span class="c-new">+ New project</span></div>
+              </div>
+              <div class="kpis">
+                <div class="kpi"><span class="kpi-ic" style="color:#f87171"><svg><use href="#i-vault"/></svg></span><div><b data-count="6">0</b><span>Projects</span></div></div>
+                <div class="kpi"><span class="kpi-ic" style="color:#fb7185"><svg><use href="#i-layers"/></svg></span><div><b data-count="18">0</b><span>Scripts</span></div></div>
+                <div class="kpi"><span class="kpi-ic" style="color:#34d399"><svg><use href="#i-key"/></svg></span><div><b data-count="2140">0</b><span>License keys</span></div></div>
+                <div class="kpi"><span class="kpi-ic" style="color:#f59e0b"><svg><use href="#i-users"/></svg></span><div><b data-count="1402">0</b><span>Bound devices</span></div></div>
+              </div>
+              <div class="c-split">
+                <div class="spark">
+                  <div class="spark-head"><span>Keys created · last 14 days</span><span style="color:#34d399">+312</span></div>
+                  <svg viewBox="0 0 320 74" preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                      <linearGradient id="sparkg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ef4444"/><stop offset=".55" stop-color="#fb7185"/><stop offset="1" stop-color="#fca5a5"/></linearGradient>
+                      <linearGradient id="sparkf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(59,130,246,.45)"/><stop offset="1" stop-color="rgba(59,130,246,0)"/></linearGradient>
+                    </defs>
+                    <path class="fill" d="M0 62 L18 54 L36 58 L54 44 L72 49 L90 33 L108 40 L126 26 L144 31 L162 18 L180 27 L198 14 L216 22 L234 10 L252 19 L270 8 L288 15 L306 6 L320 12 L320 74 L0 74 Z"/>
+                    <path class="ln" d="M0 62 L18 54 L36 58 L54 44 L72 49 L90 33 L108 40 L126 26 L144 31 L162 18 L180 27 L198 14 L216 22 L234 10 L252 19 L270 8 L288 15 L306 6 L320 12"/>
+                  </svg>
+                </div>
+                <div class="donutcard">
+                  <div class="donutring"><span>78<i>%</i></span></div>
+                  <ul class="donutleg">
+                    <li><i style="background:#34d399"></i>Active<b>1.6k</b></li>
+                    <li><i style="background:#f59e0b"></i>Unbound<b>420</b></li>
+                    <li><i style="background:#fb7185"></i>Banned<b>88</b></li>
+                  </ul>
+                </div>
+              </div>
+              <div class="log">
+                <div class="log-head"><i></i> Recent key activity</div>
+                <ul id="live-log"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marq" aria-label="Verified executor and platform targets">
+  <div class="wrap">
+    <span class="marq-lbl">Verified on</span>
+    <div class="marq-mask" style="flex:1;overflow:hidden"><div class="marq-track" id="marq"></div></div>
+  </div>
+</div>
+
+<!-- ============ STATS ============ -->
+<section class="stats" style="padding-top:88px">
+  <div class="wrap">
+    <div class="sec-head center rv" style="margin-bottom:34px">
+      <span class="eyebrow">Here are our stats</span>
+      <h2 class="big">Trusted with <em>real revenue</em></h2>
+      <p class="lede" style="margin-inline:auto">Numbers below are pulled from the same metrics page the dashboard exposes to every account — not a marketing screenshot.</p>
+    </div>
+    <div class="stats-grid rv">
+      <div class="stat"><em>Active keys</em><b data-count="1400000" data-suffix="+" data-fmt="compact">0</b><span>Lifetime &amp; day-locked, hardware bound</span></div>
+      <div class="stat"><em>Auth checks / month</em><b data-count="812" data-suffix="M+">0</b><span>Median round trip 11&nbsp;ms, p99 74&nbsp;ms</span></div>
+      <div class="stat"><em>Uptime · 12 mo</em><b data-count="99.995" data-dec="3" data-suffix="%">0</b><span>Backed by a written SLA on Pro &amp; above</span></div>
+      <div class="stat"><em>Paid to developers</em><b data-count="1240000" data-prefix="$" data-suffix="+" data-fmt="compact">0</b><span>Reward-link revenue since launch</span></div>
+    </div>
+    <p class="rv" style="text-align:center;color:var(--ink-3);font-size:12.4px;margin-top:16px;font-family:var(--mono)">* Aggregated across all tenants since November 2024. Reward revenue is developer-earned, not ours.</p>
+  </div>
+</section>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section id="architecture" style="padding-top:34px">
+  <div class="wrap split">
+    <div class="rv">
+      <span class="eyebrow">Architecture</span>
+      <h2 class="big">A stability-first<br>approach to<br><em>whitelist security</em></h2>
+      <p class="lede">Auth failures don't just annoy users — they kill a launch day, refund a month of sales and leak your hub to the free-rip channels. So we built the control plane the way SRE teams build payment systems: everything stateless at the edge, everything replicated, nothing that can hang your loader.</p>
+      <ul class="checklist">
+        <li><span class="ic"><svg><use href="#i-globe"/></svg></span><div><h4>41 edge regions, anycast in front</h4><p>Every check terminates at the closest point of presence and is answered from a replicated read replica. No region is authoritative for your users.</p></div></li>
+        <li><span class="ic"><svg><use href="#i-cpu"/></svg></span><div><h4>Stateless, idempotent verification</h4><p>Tokens are signed and verifiable on their own, so a packet loss, a cold node or a rolling deploy produces the exact same answer: <span class="mono" style="color:#a5f3fc">0.000%</span> auth error rate over 12 months.</p></div></li>
+        <li><span class="ic"><svg><use href="#i-clock"/></svg></span><div><h4>Offline grace windows</h4><p>Set 15 minutes or 72 hours. If a player loses connection mid-session, the loader keeps running instead of kicking them — then silently re-syncs.</p></div></li>
+        <li><span class="ic"><svg><use href="#i-layers"/></svg></span><div><h4>Zero-downtime key rotation</h4><p>Rotate signing keys with a dual-active overlap. Nothing you shipped last year ever stops validating.</p></div></li>
+      </ul>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px">
+        <a class="btn btn-ghost" href="/docs/api">See the exact request <span class="mono" style="color:var(--ink-3);font-size:12px">/files/v4/auth</span></a>
+        <a class="btn btn-ghost btn-arrow" href="/docs/security">Read the threat model</a>
+      </div>
+    </div>
+    <div class="rv" style="--d:120ms">
+      <div class="mapbox">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <span class="mono" style="font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)">Spider Hub edge network</span>
+          <span class="chip g" style="margin-left:auto"><i></i>healthy · <span id="node-count">41</span> nodes</span>
+        </div>
+        <svg id="mapsvg" viewBox="0 0 640 300" role="img" aria-label="World map of Spider Hub edge regions">
+          <defs><linearGradient id="arcg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="rgba(59,130,246,.0)"/><stop offset=".5" stop-color="rgba(34,211,238,.85)"/><stop offset="1" stop-color="rgba(59,130,246,0)"/></linearGradient></defs>
+          <g id="mapdots"></g><g id="maparcs"></g><g id="mappins"></g>
+        </svg>
+        <div class="legend" id="region-chips"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head center rv">
+      <span class="eyebrow">Integration</span>
+      <h2 class="big">Three steps. <em>No rewrite.</em></h2>
+      <p class="lede" style="margin-inline:auto">You do not change your script architecture, your executor targets or your sales flow. You replace one line — everything else is policy you configure from the dashboard.</p>
+    </div>
+    <div class="steps rv">
+      <article class="step"><span class="num"></span><h3>Upload your source</h3><p>Drag the raw Lua into the dashboard, or hit the API from CI. We obfuscate, embed the whitelist and hand back a build id. Your source is shredded after build unless you opt into the encrypted vault.</p><div class="mrow mono" style="margin-top:16px;font-size:11px;color:var(--ink-3)"><span>avg. build time</span><span style="color:#a7f3d0">4.6s / 100&nbsp;KB</span></div></article>
+      <article class="step"><span class="num"></span><h3>Point users at one line</h3><p>Ship a short loader that resolves the build, verifies the key and calls back into your code. It is under 300 bytes and safe to make public — there is nothing inside it to reverse.</p><div class="mrow mono" style="margin-top:16px;font-size:11px;color:var(--ink-3)"><span>loader size</span><span style="color:#a7f3d0">284&nbsp;bytes</span></div></article>
+      <article class="step"><span class="num"></span><h3>Run the business</h3><p>Stock keys for Sellix / Share.Online, let the Discord bot redeem them, watch webhooks fire, and use the kill switch if a build leaks. Update code without asking anyone to redownload.</p><div class="mrow mono" style="margin-top:16px;font-size:11px;color:var(--ink-3)"><span>kill switch propagation</span><span style="color:#a7f3d0">380&nbsp;ms global</span></div></article>
+    </div>
+
+    <div style="display:grid;gap:22px;margin-top:34px;align-items:start" class="code-split rv">
+      <div class="code">
+        <div class="code-tabs" role="tablist" aria-label="Integration examples">
+          <button role="tab" id="t-lua" aria-controls="p-lua" aria-selected="true">loader.lua</button>
+          <button role="tab" id="t-rest" aria-controls="p-rest" aria-selected="false">REST</button>
+          <button role="tab" id="t-node" aria-controls="p-node" aria-selected="false">Node SDK</button>
+          <button role="tab" id="t-web" aria-controls="p-web" aria-selected="false">Discord bot</button>
+          <button class="copy" id="copy-btn"><svg style="width:13px;height:13px"><use href="#i-copy"/></svg><span>Copy</span></button>
+        </div>
+        <div role="tabpanel" id="p-lua" aria-labelledby="t-lua"><pre><code><span class="tok-c">-- everything a script author has to write, forever</span>
+
+<span class="tok-k">local</span> Spider Hub = <span class="tok-f">loadstring</span>(<span class="tok-f">game</span>:HttpGet(<span class="tok-s">"https://cdn.spiderhub.xyz/loader/v3"</span>))
+Spider Hub:<span class="tok-f">init</span>({
+  scriptId = <span class="tok-s">"8f2a-91c0-nova-hub"</span>,
+  hwid     = <span class="tok-k">true</span>,   <span class="tok-c">-- bind device + executor</span>
+  grace    = <span class="tok-n">3600</span>,   <span class="tok-c">-- seconds of offline play</span>
+  onFail   = <span class="tok-k">function</span> (reason, detail)
+    <span class="tok-k">if</span> reason == <span class="tok-s">"KEY_EXPIRED"</span> <span class="tok-k">then</span>
+      <span class="tok-k">return</span> <span class="tok-f">ui</span>:<span class="tok-f">renewPrompt</span>(detail.renewUrl) <span class="tok-c">-- no kick, no crash</span>
+    <span class="tok-k">end</span>
+    <span class="tok-k">return</span> <span class="tok-f">ui</span>:<span class="tok-f">notice</span>(reason)
+  <span class="tok-k">end</span>,
+  vars     = { <span class="tok-s">"tier"</span>, <span class="tok-s">"note"</span>, <span class="tok-s">"expires"</span>, <span class="tok-s">"groupRank"</span> }
+})
+Spider Hub:<span class="tok-f">run</span>(<span class="tok-k">function</span> ()
+  <span class="tok-k">if</span> LS.vars.tier == <span class="tok-s">"premium"</span> <span class="tok-k">then</span> <span class="tok-f">enableModule</span>(<span class="tok-s">"autoRaid"</span>) <span class="tok-k">end</span>
+<span class="tok-k">end</span>)</code></pre></div>
+        <div role="tabpanel" id="p-rest" aria-labelledby="t-rest" hidden><pre><code><span class="tok-f">curl</span> -sS -X POST https://api.spiderhub.xyz/v3/verify \
+  -H <span class="tok-s">"Authorization: Bearer lsk_live_9c1f…"</span> \
+  -H <span class="tok-s">"Content-Type: application/json"</span> \
+  -d <span class="tok-s">'{
+    "script": "8f2a-91c0-nova-hub",
+    "build": "latest",
+    "key": "NOVA-7Q2P-XK19-M4AZ",
+    "hwid": "b41f…9ac2",
+    "fp": { "executor": "Delta", "arch": "arm64", "session": 12 },
+    "tamper": "sha256:0f91…c3d7"
+  }'</span>
+<span class="tok-c"># → 200 {"status":"SUCCESS","ttl":3600,"vars":{...}}</span>
+<span class="tok-c"># → 403 {"status":"HWID_LOCKED","remedy":{"action":"reset_link"}}</span></code></pre></div>
+        <div role="tabpanel" id="p-node" aria-labelledby="t-node" hidden><pre><code><span class="tok-k">import</span> { Spider Hub } <span class="tok-k">from</span> <span class="tok-s">"@spiderhub/sdk"</span>;
+<span class="tok-k">const</span> ls = <span class="tok-k">new</span> <span class="tok-f">Spider Hub</span>(process.env.<span class="tok-a">LS_KEY</span>);
+<span class="tok-c">// stock 500 day-locked keys straight into your shop</span>
+<span class="tok-k">const</span> keys = <span class="tok-k">await</span> ls.keys.<span class="tok-f">create</span>({
+  script: <span class="tok-s">"8f2a-91c0-nova-hub"</span>,
+  count: <span class="tok-n">500</span>, durationDays: <span class="tok-n">30</span>,
+  prefix: <span class="tok-s">"NOVA"</span>, bind: <span class="tok-s">"hwid"</span>,
+  webhook: <span class="tok-s">"https://discord.com/api/webhooks/…"</span>,
+});
+<span class="tok-k">await</span> <span class="tok-f">fs</span>.<span class="tok-f">writeFile</span>(<span class="tok-s">"stock.txt"</span>, keys.map(k =&gt; k.code).<span class="tok-f">join</span>(<span class="tok-s">"\n"</span>));
+<span class="tok-c">// verify before you ever ship the payload</span>
+<span class="tok-k">const</span> res = <span class="tok-k">await</span> ls.<span class="tok-f">verify</span>({ key, hwid, script });
+<span class="tok-k">if</span> (!res.ok) reseller.<span class="tok-f">refund</span>(res.status); <span class="tok-c">// EXPIRED | HWID_LOCKED | KILLED</span></code></pre></div>
+        <div role="tabpanel" id="p-web" aria-labelledby="t-web" hidden><pre><code><span class="tok-c">-- the managed bot is already in your Discord. Commands:</span>
+/key redeem NOVA-7Q2P-XK19-M4AZ   <span class="tok-c">→ binds your HWID, DMs the loader</span>
+/key status                       <span class="tok-c">→ 27d left · premium · 1 device</span>
+/key reset                        <span class="tok-c">→ 3 self-service resets / 30d</span>
+/invite verify                    <span class="tok-c">→ grants role on successful redeem</span>
+/ticket open <span class="tok-s">"exec threw 403"</span>     <span class="tok-c">→ posts build + fp hash to your staff</span>
+<span class="tok-c">
+-- no bot? mount your own site with the same OAuth-less endpoints:</span>
+GET https://auth.spiderhub.xyz/nova-hub/redeem?ctx=<span class="tok-s">%7B…%7D</span></code></pre></div>
+      </div>
+      <div class="fcard" style="padding:26px">
+        <span class="ficon"><svg><use href="#i-shield-check"/></svg></span>
+        <h3 style="font-size:19px">Nothing of yours ever sits on our servers</h3>
+        <p>The build happens in an ephemeral sandbox; the plaintext is shredded the moment obfuscation completes. What we keep is a hash of your source, the build manifest and the metadata your policy needs. If you enable <b style="color:#fff">Verified</b>, a human reviewer sees anonymised code and it is deleted within the hour.</p>
+        <div class="mock" style="margin-top:18px">
+          <div class="mrow" style="margin-bottom:6px"><span>source retained by default</span><span style="color:#a7f3d0">0 bytes</span></div>
+          <div class="mrow" style="margin-bottom:6px"><span>at-rest encryption</span><span style="color:#fff">AES-256-GCM</span></div>
+          <div class="mrow" style="margin-bottom:6px"><span>key custody</span><span style="color:#fff">tenant-scoped, HSM</span></div>
+          <div class="mrow"><span>data deletion SLA</span><span style="color:#fff">&lt; 60 min</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">Powerful features you'll actually use</span>
+      <h2 class="big">Everything a script business needs — <em>and nothing it has to bolt on</em></h2>
+      <p class="lede">Fourteen systems that would otherwise be a Discord ticket queue, a PHP folder on a shared VPS and three pastebin scripts. Included in every paid plan.</p>
+    </div>
+    <div class="fgrid">
+      <article class="fcard wide rv">
+        <span class="ficon"><svg><use href="#i-bot"/></svg></span>
+        <span class="tag">Managed</span>
+        <h3>Discord bot with a real control panel</h3>
+        <p>Redeem, check status, reset HWID, open tickets and receive role grants — inside your server, no site login for the average user. Bring your own bot token or use ours; every action is mirrored to the same audit log your staff sees on the web.</p>
+        <div class="mock">
+          <div><b>nova-bot</b> · #key-support</div>
+          <div style="margin-top:7px;color:#a7f3d0">✔ NOVA-7Q2P-XK19-M4AZ redeemed → HWID b41f…9ac2 · 30d premium</div>
+          <div style="margin-top:4px;color:#6f7899">→ role "Premium" granted · webhook sent · expiry 03 Nov 2026</div>
+        </div>
+      </article>
+      <article class="fcard rv" style="--d:60ms">
+        <span class="ficon"><svg><use href="#i-key"/></svg></span>
+        <h3>Key stocking &amp; export</h3>
+        <p>Generate 5 or 50,000 keys with day-lock, lifetime or usage caps, prefix them for your brand, then export CSV / TXT straight into Sellix, Share.Online or a Google Sheet. Duplicate protection and per-batch limits included.</p>
+        <div class="mock" style="margin-top:16px">
+          <div class="mrow"><span>keys minted this batch</span><span style="color:#fff">500</span></div>
+          <div class="meter" style="--w:78%"><i></i></div>
+          <div class="mrow"><span>redeemed</span><span style="color:#a7f3d0">391 · 78%</span></div>
+        </div>
+      </article>
+      <article class="fcard rv" style="--d:120ms">
+        <span class="ficon"><svg><use href="#i-code"/></svg></span>
+        <h3>Runtime variables</h3>
+        <p>Per-key data your code can read — Discord ID, note, expiry, plan tier, arbitrary JSON — so you branch for a single user, an affiliate or a beta group without shipping a second build.</p>
+        <div class="mock" style="margin-top:16px"><span style="color:#6f7899">LS.vars</span> = { tier=<span style="color:#7dd3fc">"premium"</span>, seat=<span style="color:#fbbf24">2</span>, beta=<span style="color:#a5b4fc">true</span> }</div>
+      </article>
+      <article class="fcard rv">
+        <span class="ficon"><svg><use href="#i-power"/></svg></span>
+        <span class="tag b">380 ms</span>
+        <h3>One-click kill switch</h3>
+        <p>Disable a build, a script, a tier or a single leaked key. Scope it to a version range so old buyers keep working while the leaked build dies. Every execution after that returns your custom message.</p>
+      </article>
+      <article class="fcard rv" style="--d:60ms">
+        <span class="ficon"><svg><use href="#i-vault"/></svg></span>
+        <h3>Encrypted vault &amp; rollback</h3>
+        <p>Opt in and every build is sealed with your own passphrase and stored, so losing your laptop is a bad afternoon rather than a lost product. Roll any script back to a previous build in one click.</p>
+      </article>
+      <article class="fcard rv" style="--d:120ms">
+        <span class="ficon"><svg><use href="#i-coin"/></svg></span>
+        <h3>Reward-link ad system</h3>
+        <p>Monetise free users with Linkvertise, LootLabs, AdMaven or your own shorteners. Server-side completion proof means no fake passes, and we take 0% of what you earn.</p>
+        <div class="mock" style="margin-top:16px">
+          <div class="mrow"><span>completed today</span><span style="color:#fff">1,204 clicks</span></div>
+          <div class="meter" style="--w:64%"><i></i></div>
+          <div class="mrow"><span>payout to you</span><span style="color:#a7f3d0">$41.20 · 0% cut</span></div>
+        </div>
+      </article>
+      <article class="fcard rv">
+        <span class="ficon"><svg><use href="#i-finger"/></svg></span>
+        <h3>Anti-tamper &amp; fingerprinting</h3>
+        <p>Integrity hash on the payload, emulator/clone detection, session binding, VM and proxy scoring. Suspicious executions are served a decoy build instead of an error, so leakers learn nothing from probing.</p>
+      </article>
+      <article class="fcard rv" style="--d:60ms">
+        <span class="ficon"><svg><use href="#i-webhook"/></svg></span>
+        <h3>Webhooks &amp; audit log</h3>
+        <p>Every redeem, reset, refund request, kill switch flip and blocked execution hits Discord or your endpoint with the full actor chain. Searchable for 90 days, exportable forever.</p>
+      </article>
+      <article class="fcard rv" style="--d:120ms">
+        <span class="ficon"><svg><use href="#i-plug"/></svg></span>
+        <h3>Automatic integration</h3>
+        <p>The whitelist is embedded at build time with a Luraph-class VM pass — no wrapper file, no hand-written auth block, and nothing for a buyer to strip out by deleting the top ten lines.</p>
+      </article>
+      <article class="fcard rv">
+        <span class="ficon"><svg><use href="#i-users"/></svg></span>
+        <h3>Teams, roles &amp; resellers</h3>
+        <p>Give staff read-only access, let a reseller mint keys for one script only, and require 2FA on anything destructive. Every action is attributed — no shared logins at 3am.</p>
+      </article>
+      <article class="fcard rv" style="--d:60ms">
+        <span class="ficon"><svg><use href="#i-chart"/></svg></span>
+        <h3>Analytics that answer questions</h3>
+        <p>DAU by script, executions by executor and country, churn on day-locked keys, revenue per affiliate and the top 10 failed-status reasons — with a CSV export for your accountant.</p>
+      </article>
+      <article class="fcard rv" style="--d:180ms">
+        <span class="ficon"><svg><use href="#i-users"/></svg></span>
+        <h3>Affiliate &amp; reseller codes</h3>
+        <p>Issue a prefixed batch to each reseller or affiliate, then see exactly whose keys are running, whose are refunding and who is leaking. Payout percentages and per-seller caps are enforced at verification time, not by trust.</p>
+      </article>
+      <article class="fcard rv" style="--d:120ms">
+        <span class="ficon"><svg><use href="#i-search"/></svg></span>
+        <h3>Support tools for buyers</h3>
+        <p>Self-service reset links, a copyable diagnostic bundle, status page per script and canned replies. Your ticket volume drops because 90% of "the key is broken" is a stale HWID.</p>
+      </article>
+      <article class="fcard rv" style="--d:180ms">
+        <span class="ficon"><svg><use href="#i-shield"/></svg></span>
+        <span class="tag b">Opt-in</span>
+        <h3>Verified-script review</h3>
+        <p>Volunteer your source for a human review and earn a Verified badge buyers can filter on. Reviewers see anonymised code, and it is deleted within the hour. Once enabled it cannot be switched off — that is the point.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLAYGROUND ============ -->
+<section id="playground">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow"><span class="mono">POST /v3/verify</span></span>
+      <h2 class="big"> Poke the auth engine. <em>Right here.</em></h2>
+      <p class="lede">Pick a scenario and watch each verification stage resolve in the order your users hit it — the same response shape, error codes and remedies the real API returns. No signup, no rate limit.</p>
+    </div>
+    <div class="play rv">
+      <div class="play-bar">
+        <div class="seg" role="group" aria-label="Auth scenario">
+          <button data-sc="lifetime" aria-pressed="true">lifetime key</button>
+          <button data-sc="daylock" aria-pressed="false">30-day key</button>
+          <button data-sc="expired" aria-pressed="false">expired</button>
+          <button data-sc="hwid" aria-pressed="false">hwid mismatch</button>
+          <button data-sc="tamper" aria-pressed="false">tampered payload</button>
+          <button data-sc="killed" aria-pressed="false">kill switch</button>
+          <button data-sc="limit" aria-pressed="false">rate limited</button>
+          <button data-sc="ffa" aria-pressed="false">keyless (FFA)</button>
+        </div>
+      </div>
+      <div class="play-grid">
+        <div class="play-col">
+          <div class="play-lbl">Verification pipeline</div>
+          <ul class="pipe" id="pipe"></ul>
+          <div class="play-lbl" style="margin-top:22px">Incoming request</div>
+          <pre class="res" id="req"></pre>
+        </div>
+        <div class="play-col">
+          <div class="play-lbl">Response · <span id="rtt">—</span></div>
+          <div id="verdict"></div>
+          <pre class="res" id="res"></pre>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:16px">
+            <button class="btn btn-ghost btn-sm" id="replay"><svg aria-hidden="true" style="width:14px;height:14px"><use href="#i-refresh"/></svg>Replay</button>
+            <span class="chip" id="note" style="border-color:rgba(59,130,246,.34);background:rgba(59,130,246,.09);color:#bfdbfe"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPARISON ============ -->
+<section id="compare">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">The honest comparison</span>
+      <h2 class="big">Against the two ways <em>most people do this today</em></h2>
+      <p class="lede">Rolling your own auth gives you a maintenance burden you never budgeted for. A legacy whitelist gives you a shared, single-region key server and a changelog nobody reads. Numbers are p50 over a 30-day window.</p>
+    </div>
+    <div class="cmp rv">
+      <table>
+        <thead><tr>
+          <th style="width:26%">Capability</th>
+          <th style="width:22%">DIY PHP + pastebin</th>
+          <th style="width:24%">Legacy whitelist</th>
+          <th class="hi" style="width:28%"><span><svg style="width:14px;height:14px"><use href="#i-shield"/></svg>Spider Hub</span></th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="name">Median auth latency</td><td class="n">340&nbsp;ms (1 region)</td><td class="n">182&nbsp;ms</td><td class="hi"><span class="y">11&nbsp;ms · 41 regions</span></td></tr>
+          <tr><td class="name">Auth error rate</td><td class="n">depends on your hosting</td><td class="n">0.8&ndash;2.4% on launch day</td><td class="hi"><span class="y">0.000% · 12 months</span></td></tr>
+          <tr><td class="name">Offline behaviour</td><td class="n">user gets kicked</td><td class="n">user gets kicked</td><td class="hi"><span class="y">configurable grace, up to 72h</span></td></tr>
+          <tr><td class="name">Written uptime SLA</td><td class="n">none</td><td class="n">verbal</td><td class="hi"><span class="y">99.99%, credits in contract</span></td></tr>
+          <tr><td class="name">Kill switch scope</td><td class="n">delete the file, pray</td><td class="n">per script</td><td class="hi"><span class="y">script · build · version range · single key</span></td></tr>
+          <tr><td class="name">HWID resets</td><td class="n">manual, in DMs</td><td class="n">manual with a cap</td><td class="hi"><span class="y">self-service, budgeted per user</span></td></tr>
+          <tr><td class="name">Ad / reward revenue cut</td><td class="n">&mdash;</td><td class="n">10&ndash;20% platform fee</td><td class="hi"><span class="y">0% — we never touch it</span></td></tr>
+          <tr><td class="name">Source retention</td><td class="n">on a VPS someone leaked in 2024</td><td class="n">stored for re-obfuscation</td><td class="hi"><span class="y">0 bytes by default, opt-in sealed vault</span></td></tr>
+          <tr><td class="name">Anti-tamper</td><td class="n">none</td><td class="n">signature check</td><td class="hi"><span class="y">integrity + fp scoring + decoy builds</span></td></tr>
+          <tr><td class="name">Key Check API before execution</td><td class="n">n/a</td><td class="n">basic</td><td class="hi"><span class="y">full JSON, 40+ fields, typed SDKs</span></td></tr>
+          <tr><td class="name">Team seats &amp; audit log</td><td class="n">shared FTP password</td><td class="n">owner only</td><td class="hi"><span class="y">roles, 2FA, 90-day searchable log</span></td></tr>
+          <tr><td class="name">Migration from another service</td><td class="n">n/a</td><td class="n">n/a</td><td class="hi"><span class="y">import your keys &amp; expiry dates free</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="price-head">
+      <div class="rv">
+        <span class="eyebrow">Simple, one-time pricing</span>
+        <h2 class="big" style="margin-bottom:10px">Pay once. <em>Yours for life.</em></h2>
+        <p class="lede">No subscriptions, no per-execution billing, no revenue share. One-time payment, lifetime access. Every plan includes HWID locking, keyless mode and the kill switch.</p>
+      </div>
+    </div>
+
+    <div class="tiers" style="grid-template-columns:repeat(3,1fr);max-width:960px">
+      <article class="tier rv">
+        <h3>Free</h3>
+        <p class="desc">Ship your first script and keep it yours.</p>
+        <div class="amt"><span class="cur">$</span><span class="v">0</span></div>
+        <div class="billed">free forever</div>
+        <ul>
+          <li class="on"><svg><use href="#i-check"/></svg><b>1</b> project</li>
+          <li class="on"><svg><use href="#i-check"/></svg><b>1</b> script</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Unlimited license keys</li>
+          <li class="on"><svg><use href="#i-check"/></svg>HWID locking</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Keyless (FFA) mode</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Kill switch &amp; HWID bans</li>
+        </ul>
+        <a class="btn btn-ghost" href="/register">Create account</a>
+      </article>
+
+      <article class="tier pop rv" style="--d:60ms">
+        <span class="flag">Most popular</span>
+        <h3>Premium</h3>
+        <p class="desc">For a growing hub with multiple scripts.</p>
+        <div class="amt"><span class="cur">$</span><span class="v">5</span></div>
+        <div class="billed">one-time · lifetime</div>
+        <ul>
+          <li class="on"><svg><use href="#i-check"/></svg><b>6</b> projects</li>
+          <li class="on"><svg><use href="#i-check"/></svg><b>10</b> scripts</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Everything in Pro</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Unlimited license keys</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Keyless mode &amp; kill switch</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Priority support</li>
+        </ul>
+        <a class="btn btn-primary" href="/register">Get Premium<svg><use href="#i-arrow"/></svg></a>
+      </article>
+
+      <article class="tier rv" style="--d:120ms">
+        <h3>Pro</h3>
+        <p class="desc">More room as you ship more scripts.</p>
+        <div class="amt"><span class="cur">$</span><span class="v">3</span></div>
+        <div class="billed">one-time · lifetime</div>
+        <ul>
+          <li class="on"><svg><use href="#i-check"/></svg><b>3</b> projects</li>
+          <li class="on"><svg><use href="#i-check"/></svg><b>5</b> scripts</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Unlimited license keys</li>
+          <li class="on"><svg><use href="#i-check"/></svg>HWID locking</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Keyless (FFA) mode</li>
+          <li class="on"><svg><use href="#i-check"/></svg>Kill switch &amp; HWID bans</li>
+        </ul>
+        <a class="btn btn-ghost" href="/register">Get Pro</a>
+      </article>
+    </div>
+
+    <div class="pay rv">
+      <span>We accept</span>
+      <span class="chip"><i class="dot" style="width:6px;height:6px;border-radius:50%;background:#f7931a"></i>BTC</span>
+      <span class="chip"><i style="background:#627eea"></i>ETH</span>
+      <span class="chip"><i style="background:#26a17b"></i>USDT</span>
+      <span class="chip"><svg style="width:12px;height:12px"><use href="#i-coin"/></svg>Card / Apple&nbsp;Pay</span>
+      <span class="chip"><svg style="width:12px;height:12px"><use href="#i-mail"/></svg>PayPal</span>
+    </div>
+    <div class="pay-notes rv" style="display:grid;gap:14px;margin-top:26px">
+      <div class="fcard" style="padding:18px 20px"><h4 style="font-size:14px;margin-bottom:6px">Pay once, keep it forever</h4><p style="font-size:13.2px">A one-time payment unlocks your plan for life — no monthly charges, no renewals, nothing to cancel.</p></div>
+      <div class="fcard" style="padding:18px 20px"><h4 style="font-size:14px;margin-bottom:6px">Redeem a code to upgrade</h4><p style="font-size:13.2px">Upgrades are delivered as a redeem code you enter from your dashboard — your plan changes instantly.</p></div>
+      <div class="fcard" style="padding:18px 20px"><h4 style="font-size:14px;margin-bottom:6px">Start free</h4><p style="font-size:13.2px">Create an account and explore the whole dashboard on the Free plan. Upgrade only when you need more scripts.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section id="wall" style="padding-top:20px">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="eyebrow">From the people shipping on it</span>
+      <h2 class="big">Fewer tickets. <em>Longer launches.</em></h2>
+    </div>
+    <div class="quotes">
+      <blockquote class="quote rv"><div class="stars">★★★★★</div><p>"Launch day used to mean sitting in Discord refreshing status. 41k executions in two hours, zero auth errors, and I went to bed at 1am like a normal person."</p><footer><span class="ava">NV</span><div class="who"><b>n0va</b><span>NovaHub · 12k buyers</span></div><span class="plat">Pro</span></footer></blockquote>
+      <blockquote class="quote rv" style="--d:60ms"><div class="stars">★★★★★</div><p>"We moved 6,400 live keys over in an afternoon with the importer. Expiry dates, HWIDs, notes, all intact. Our old service had been quietly dropping resets for a year."</p><footer><span class="ava">KL</span><div class="who"><b>kyll</b><span>Lumen Team · lead</span></div><span class="plat">Premium</span></footer></blockquote>
+      <blockquote class="quote rv" style="--d:120ms"><div class="stars">★★★★★</div><p>"Runtime variables replaced an entire second hub. I give my resellers a tier flag and my beta group gets features a build earlier — one codebase, one key system."</p><footer><span class="ava">DR</span><div class="who"><b>dren</b><span>Drift Suite</span></div><span class="plat">Pro</span></footer></blockquote>
+      <blockquote class="quote rv"><div class="stars">★★★★★</div><p>"A leaker dumped my build. Kill switch scoped to that version range killed it in front of everyone, and the decoy payload made their 'bypass' video useless. Best $40 I spend."</p><footer><span class="ava">SX</span><div class="who"><b>syntax</b><span>Vertex · solo dev</span></div><span class="plat">Pro</span></footer></blockquote>
+      <blockquote class="quote rv" style="--d:60ms"><div class="stars">★★★★★</div><p>"Reward links were 80% of my income last quarter and I keep every cent of it. The completion proof stopped the bot-farm clicks that ate 30% of my revenue before."</p><footer><span class="ava">MI</span><div class="who"><b>mira</b><span>Halo Scripts</span></div><span class="plat">Premium</span></footer></blockquote>
+      <blockquote class="quote rv" style="--d:120ms"><div class="stars">★★★★★</div><p>"My users are teenagers on phones. Self-service HWID reset with a 3-per-month budget killed 90% of my support queue overnight. The bot does the work I used to do."</p><footer><span class="ava">AO</span><div class="who"><b>aoi</b><span>Sakura Hub</span></div><span class="plat">Basic</span></footer></blockquote>
+    </div>
+    <p style="text-align:center;color:var(--ink-3);font-size:11.6px;margin-top:20px;font-family:var(--mono)">Illustrative copy for this build — replace with your own verified customer quotes before launch.</p>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head center rv">
+      <span class="eyebrow">F.A.Q</span>
+      <h2 class="big">The questions <em>we get asked weekly</em></h2>
+    </div>
+    <div class="faq">
+      <details class="rv" open><summary><span class="q">01</span>Do you keep a copy of my source code?<span class="pm"></span></summary><div class="a">By default, no. Your source is streamed into an ephemeral build sandbox, obfuscated, and the plaintext is shredded as soon as the build is signed. What we retain is the SHA-256 of the payload, the build manifest and the policy metadata needed to authenticate. If you switch on the encrypted vault, copies are sealed with <code>AES-256-GCM</code> using a passphrase only you hold — we cannot read them, and we cannot restore them for you.</div></details>
+      <details class="rv"><summary><span class="q">02</span>What happens to my users if Spider Hub goes down?<span class="pm"></span></summary><div class="a">Nothing they can see. Verification tokens are self-contained, so a loader inside its grace window keeps running without contacting us at all. Set the window to 15 minutes or 72 hours per script. Auth endpoints are anycast across 41 regions, so a region failure reroutes mid-session; you get an SLA credit if we ever miss 99.99%.</div></details>
+      <details class="rv"><summary><span class="q">03</span>Can a determined leaker just bypass the whitelist?<span class="pm"></span></summary><div class="a">Any client-side check can be attacked — the goal is making it more expensive than buying a key. We sign the loader, verify a build-level integrity hash server-side, score the fingerprint, bind the HWID, serve a decoy build instead of an error when tampering is detected, and expire tokens on a short TTL so a captured payload is not reusable. Combined with the per-key instance caps, mass redistribution dies in hours, not months.</div></details>
+      <details class="rv"><summary><span class="q">04</span>How do I move from another whitelist service?<span class="pm"></span></summary><div class="a">Use the importer: upload a CSV of codes, expiry timestamps, HWIDs and notes, or hand us your old service's API key and we pull it. Keys keep their remaining time, existing buyers never re-register, and we run both services in shadow mode for as long as you like so you can compare the responses before switching the loader.</div></details>
+      <details class="rv"><summary><span class="q">05</span>Is the obfuscation really included?<span class="pm"></span></summary><div class="a">Yes — unlimited on every paid plan, including the trial. One Luraph-class VM pass with control-flow flattening, string encryption and anti-debug is embedded at build time. Premium and above can request a hardened profile (namespace collisions, per-function key rotation, decoy control branches). We do not charge per obfuscation and we do not cap monthly builds.</div></details>
+      <details class="rv"><summary><span class="q">06</span>What is HWID exactly, and are you tracking people?<span class="pm"></span></summary><div class="a">A salted hash of non-identifiable device and executor properties — never a username, never a file path, never anything a user typed. It exists so one key cannot be shared across 400 machines. The hash is only meaningful to your script, and users get a self-service reset budget so a reinstall does not become a support ticket.</div></details>
+      <details class="rv"><summary><span class="q">07</span>Which executors and platforms work?<span class="pm"></span></summary><div class="a">Everything that can run <code>HttpGet</code>/<code>request</code> and a loadstring — Windows, macOS, Android and ARM builds included. The loader needs no library, no external binary and no privileged API. If your target can't make an HTTPS request, the offline grace mode plus pre-issued tokens still works; ask us and we will write the shim.</div></details>
+      <details class="rv"><summary><span class="q">08</span>Do you take a cut of my ad revenue?<span class="pm"></span></summary><div class="a">No. Reward links pay you directly from the network you choose; we take 0% and we never sit in the payout path. We publish per-network completion rates so you can see why a click did not convert instead of guessing — and you can plug in your own shortener with custom URLs on Pro.</div></details>
+      <details class="rv"><summary><span class="q">09</span>Is this allowed with Roblox's ToS?<span class="pm"></span></summary><div class="a">Spider Hub protects and licenses your own code; it does not inject into games, exploit other players or automate purchases. Scripting itself sits in a grey area that you and your users are responsible for, and we do not permit scripts whose purpose is stealing, trading abuse or account compromise — those are rejected from Verified mode and removed under our ToS.</div></details>
+      <details class="rv"><summary><span class="q">10</span>What does the Enterprise plan actually unlock?<span class="pm"></span></summary><div class="a">Dedicated capacity and a rate-limit bypass, per-key instance caps, execution ceilings, HWID-less modes, cloned-emulator allow/blocklists, custom ad URLs on your own domain, SSO for staff, a signed DPA with uptime credits, and a direct line to the engineers who run the build pipeline for feature requests.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta">
+  <div class="wrap">
+    <div class="cta-box rv">
+      <h2>Your code, <span class="grad-text">your rules, your money</span></h2>
+      <p>Spin up a workspace, upload one script and see a signed, hardware-locked build in under two minutes. Fourteen days of Premium on the house — no card, no sales call, no lock-in.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="/register"><svg><use href="#i-rocket"/></svg>Create free workspace</a>
+        <a class="btn btn-ghost btn-lg" href="/docs/discord"><svg><use href="#i-discord"/></svg>Connect your Discord</a>
+      </div>
+      <div style="display:flex;gap:22px;justify-content:center;flex-wrap:wrap;margin-top:26px;position:relative">
+        <span class="chip g"><i></i>provision in 90 seconds</span>
+        <span class="chip"><i style="background:var(--blue);box-shadow:0 0 8px var(--blue)"></i>free key import</span>
+        <span class="chip"><i style="background:var(--amber);box-shadow:0 0 8px var(--amber)"></i>cancel with one code</span>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site">
+  <div class="wrap">
+    <div class="fgrid2">
+      <div class="fbrand">
+        <a class="logo" href="/"><span class="logo-mark"><img src="/logo.webp" alt="Spider Hub" /></span><b>Lua<span>Secure</span></b></a>
+        <p>The whitelist, licensing and monetization layer for Lua &amp; Luau script developers. Built by people who got paged at 4am.</p>
+        <div class="fbot" style="border:0;margin:16px 0 0;padding:0"><a class="status" href="/docs/status"><i></i><span data-service-status>Checking web service…</span></a></div>
+      </div>
+      <div class="fcol"><h4>Product</h4><a href="/docs/features">Features</a><a href="/docs/api">Auth API</a><a href="/docs/loader">Loader &amp; obfuscation</a><a href="/docs/pricing">Pricing</a><a href="/docs/compare-plans">Compare plans</a><a href="/docs/status">Status page</a><a href="/docs/changelog">Changelog</a></div>
+      <div class="fcol"><h4>Developers</h4><a href="/docs/getting-started">Documentation</a><a href="/docs/api">API reference</a><a href="/docs/loader">Loader usage</a><a href="/docs/examples">API examples</a><a href="/docs/migration">Migration guide</a><a href="/docs/errors">Error code index</a><a href="/spiderhub.postman_collection.json" download>Postman collection</a></div>
+      <div class="fcol"><h4>Company</h4><a href="/docs/customer-stories">Customer stories</a><a href="/docs/about">About</a><a href="/docs/security">Security &amp; threat model</a><a href="/docs/careers">Careers</a><a href="/docs/faq">FAQ</a><a href="/docs/press-kit">Press kit</a></div>
+      <div class="fcol"><h4>Legal</h4><a href="/docs/terms">Terms of service</a><a href="/docs/privacy">Privacy policy</a><a href="/docs/refunds">Refund policy</a><a href="/docs/dmca">DMCA</a><a href="/docs/verified-scripts">Verified-script rules</a><a href="/docs/report-abuse">Report abuse</a></div>
+    </div>
+    <div class="fbot">
+      <span>© 2026 Spider Hub · A concept landing page</span>
+      <div class="socials">
+        <a href="/docs/discord" aria-label="Discord"><svg><use href="#i-discord"/></svg></a>
+        <a aria-disabled="true" aria-label="X" class="fill-icon"><svg class="fill-icon"><use href="#i-x-social"/></svg></a>
+        <a aria-disabled="true" aria-label="GitHub"><svg><use href="#i-github"/></svg></a>
+        <a aria-disabled="true" aria-label="Email"><svg><use href="#i-mail"/></svg></a>
+      </div>
+    </div>
+    <p class="disc">Spider Hub is not affiliated with, endorsed by, or sponsored by Roblox Corporation. Roblox is a trademark of Roblox Corporation. Product metrics, plans and testimonials on this page are demo content for this landing-page build and should be replaced with your own before publishing.</p>
+  </div>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"><svg aria-hidden="true"><use href="#i-check"/></svg><span id="toast-msg">Copied</span></div>
+
+<script>
+(function(){
+  "use strict";
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s,r)=>(r||document).querySelector(s);
+  const $$ = (s,r)=>[...(r||document).querySelectorAll(s)];
+
+  /* ---------- nav state, scroll progress ---------- */
+  const nav=$("#nav"), prog=$("#prog");
+  let raf=0;
+  function onScroll(){
+    if(raf) return; raf=requestAnimationFrame(()=>{
+      raf=0;
+      const y=scrollY;
+      nav.classList.toggle("stuck", y>18);
+      const h=document.documentElement.scrollHeight-innerHeight;
+      prog.style.transform="scaleX("+(h>0?Math.min(1,y/h):0)+")";
+      tick();
+    });
+  }
+  addEventListener("scroll",onScroll,{passive:true}); onScroll();
+
+  /* ---------- mobile menu ---------- */
+  const burger=$("#burger");
+  burger.addEventListener("click",()=>{
+    const open=document.body.classList.toggle("menu-open");
+    burger.setAttribute("aria-expanded",open?"true":"false");
+  });
+  $$("#mmobile a").forEach(a=>a.addEventListener("click",()=>{
+    document.body.classList.remove("menu-open"); burger.setAttribute("aria-expanded","false");
+  }));
+  addEventListener("keydown",e=>{ if(e.key==="Escape") document.body.classList.remove("menu-open"); });
+
+  /* ---------- reveal on scroll + counters (scroll-driven: nothing can stay hidden) ---------- */
+  const pendingRv = RM ? [] : $$(".rv");
+  const pendingCt = [...$$("[data-count]")];
+  function fmt(v,o){
+    let s;
+    if(o.fmt==="compact"){
+      const a=Math.abs(v);
+      if(a>=1e9) s=(v/1e9).toFixed(a>=1e10?0:1).replace(/\.0$/,"")+"B";
+      else if(a>=1e6) s=(v/1e6).toFixed(a>=1e7?0:1).replace(/\.0$/,"")+"M";
+      else if(a>=1e3) s=(v/1e3).toFixed(a>=1e4?0:1).replace(/\.0$/,"")+"k";
+      else s=Math.round(v).toString();
+    } else s = o.dec? v.toFixed(o.dec) : Math.round(v).toLocaleString("en-US");
+    return (o.prefix||"")+s+(o.suffix||"");
+  }
+  function runCount(el){
+    if(el.dataset.done) return; el.dataset.done="1";
+    const o=el.dataset, target=parseFloat(o.count);
+    if(RM){ el.textContent=fmt(target,o); return; }
+    const t0=performance.now(), dur=1400+Math.random()*400;
+    (function step(t){
+      const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3);
+      el.textContent=fmt(target*e,o);
+      if(p<1) requestAnimationFrame(step); else el.textContent=fmt(target,o);
+    })(t0);
+  }
+  function tick(){
+    const H=innerHeight;
+    for(let i=pendingRv.length-1;i>=0;i--){
+      const el=pendingRv[i];
+      if(el.getBoundingClientRect().top < H*.94){ el.classList.add("in"); pendingRv.splice(i,1); }
+    }
+    for(let i=pendingCt.length-1;i>=0;i--){
+      const el=pendingCt[i];
+      if(el.getBoundingClientRect().top < H*.96){ runCount(el); pendingCt.splice(i,1); }
+    }
+  }
+  if(RM){ $$(".rv").forEach(el=>el.classList.add("in")); pendingCt.forEach(el=>{runCount(el)}); pendingCt.length=0; }
+  addEventListener("resize",tick,{passive:true});
+  tick();
+
+  /* ---------- cursor spotlight + tilt ---------- */
+  if(!RM && matchMedia("(pointer:fine)").matches){
+    const spot=$("#spot"), tilt=$("#tilt");
+    let sx=0,sy=0,tx=0,ty=0;
+    addEventListener("pointermove",e=>{ sx=e.clientX; sy=e.clientY; document.body.classList.add("has-cursor"); },{passive:true});
+    (function loop(){ tx+=(sx-tx)*.12; ty+=(sy-ty)*.12; spot.style.transform="translate3d("+tx+"px,"+ty+"px,0)"; requestAnimationFrame(loop); })();
+    if(tilt){
+      const host=tilt.parentElement;
+      host.addEventListener("pointermove",e=>{
+        const r=tilt.getBoundingClientRect();
+        const px=(e.clientX-r.left)/r.width-.5, py=(e.clientY-r.top)/r.height-.5;
+        tilt.style.transition="transform .1s linear";
+        tilt.style.transform="perspective(1400px) rotateY("+(px*5.5)+"deg) rotateX("+(-py*4.5)+"deg) translateZ(0)";
+      });
+      host.addEventListener("pointerleave",()=>{ tilt.style.transition="transform .7s cubic-bezier(.22,1,.36,1)"; tilt.style.transform=""; });
+    }
+  }
+  /* card hover spotlight */
+  $$(".fcard,.step,.quote,.tier").forEach(card=>{
+    card.addEventListener("pointermove",e=>{
+      const r=card.getBoundingClientRect();
+      card.style.setProperty("--mx",(e.clientX-r.left)+"px");
+      card.style.setProperty("--my",(e.clientY-r.top)+"px");
+    });
+  });
+
+  /* ---------- hero live log ---------- */
+  (function(){
+    const ul=$("#live-log"); if(!ul) return;
+    const cities=["fra1","lhr1","iad1","sfo1","sin1","gru1","cdg1","nyc1","syd1","bom1","ams1","waw1"];
+    const acts=[
+      ["ok","redeem"], ["ok","verify"], ["ok","verify"], ["ok","hwid-bind"],
+      ["no","tamper·blocked"], ["ok","verify"], ["wt","grace·renew"], ["ok","key·mint"],
+      ["ok","verify"], ["no","expired"], ["ok","reward·complete"], ["ok","verify"]
+    ];
+    const hid=()=>Math.random().toString(16).slice(2,6)+"…"+Math.random().toString(16).slice(2,6);
+    function line(){
+      const a=acts[Math.random()*acts.length|0], c=cities[Math.random()*cities.length|0];
+      const li=document.createElement("li");
+      const now=new Date();
+      li.innerHTML='<span class="t">'+String(now.getHours()).padStart(2,"0")+":"+String(now.getMinutes()).padStart(2,"0")+":"+String(now.getSeconds()).padStart(2,"0")+'</span>'+
+        '<span class="'+a[0]+'">'+(a[0]==="ok"?"✓":a[0]==="no"?"✕":"!")+'</span>'+
+        '<span class="m">'+a[1]+' · '+c+' · '+hid()+'</span><span class="rt">'+(6+Math.random()*48|0)+'ms</span>';
+      ul.prepend(li);
+      while(ul.children.length>8) ul.lastElementChild.remove();
+    }
+    for(let i=0;i<8;i++) line();
+    if(!RM) setInterval(line, 2200);
+  })();
+
+  /* ---------- marquee ---------- */
+  (function(){
+    const track=$("#marq"); if(!track) return;
+    const items=["Delta","Codex","Hydrogen","Arceus","Wave","Electron","Trigun","Velocity","Fulcrum","Solara","ARM / Android","macOS 15"];
+    const ico=["i-shield","i-cpu","i-bolt","i-plug","i-lock","i-key","i-finger","i-globe"];
+    const html=items.map((n,i)=>'<span><svg aria-hidden="true"><use href="#'+ico[i%ico.length]+'"/></svg>'+n+'</span>').join("");
+    track.innerHTML=html+html;
+  })();
+
+  /* ---------- world map ---------- */
+  (function(){
+    const dots=$("#mapdots"), pins=$("#mappins"), arcs=$("#maparcs"), chips=$("#region-chips");
+    if(!dots) return;
+    const MAP=[
+      ".............#####...#####.......##..........##############.....",
+      "....####.###########..#####.....###...#####################.....",
+      "...##################..#####....#############################...",
+      "..####################..#######.###############################.",
+      "..###################....###....################################",
+      ".......#############..........##.###############################",
+      ".........##########...........##.###############################",
+      "..........#########.............#########.################......",
+      "...........########............###########################......",
+      "............#######............###########################......",
+      ".............######...........###.#######################.......",
+      ".............#####............########..###############.#.......",
+      "..............####............#######...###############.........",
+      "....##.........#######........#######....#############..........",
+      "....##...........####.........########.......########...........",
+      "...................#####.......#######.......###.####...........",
+      "....................#####.......######.........##.###...........",
+      "....................######.......#####...........######.........",
+      ".....................######.......#####...........######........",
+      "......................######.......#####............######......",
+      "......................######.......######...............#####...",
+      ".......................#####........#####...............######..",
+      ".......................####.........#####..............########.",
+      ".......................####.........####..............########..",
+      ".......................###..........###................#####..##",
+      ".......................###..........##.................####...##",
+      ".......................###...............................##..##.",
+      ".......................##....................................#..",
+      ".......................#........................................",
+      "................................................................"];
+    const CW=10, CH=10, NS="http://www.w3.org/2000/svg", R=2.5;
+    const frag=document.createDocumentFragment();
+    for(let r=0;r<MAP.length;r++) for(let c=0;c<64;c++){
+      if(MAP[r][c]!=="#") continue;
+      const near = (MAP[r-1]||"")[c]==="#"||(MAP[r+1]||"")[c]==="#"||(MAP[r][c-1]||"")==="#"||(MAP[r][c+1]||"")==="#";
+      const rect=document.createElementNS(NS,"rect");
+      rect.setAttribute("x",c*CW+2); rect.setAttribute("y",r*CH+2);
+      rect.setAttribute("width",CW-4.4); rect.setAttribute("height",CH-4.4);
+      rect.setAttribute("rx",1.7);
+      rect.setAttribute("fill","rgba(160,175,220,"+(near?".15":".095")+")");
+      frag.appendChild(rect);
+    }
+    dots.appendChild(frag);
+    const P=(lon,lat)=>[ (lon+180)/360*64*CW+CW/2, (78-lat)/4.5*CH+CH/2 ];
+    const REG=[
+      {id:"lhr",n:"London",lon:-0.1,lat:51.5,ms:9},
+      {id:"fra",n:"Frankfurt",lon:8.7,lat:50.1,ms:11},
+      {id:"iad",n:"N. Virginia",lon:-77.5,lat:38.9,ms:12},
+      {id:"sfo",n:"Oregon",lon:-121.3,lat:44.1,ms:14},
+      {id:"gru",n:"São Paulo",lon:-46.6,lat:-23.5,ms:19},
+      {id:"jnb",n:"Johannesburg",lon:28.0,lat:-26.2,ms:24},
+      {id:"dxb",n:"Dubai",lon:55.3,lat:25.2,ms:17},
+      {id:"bom",n:"Mumbai",lon:72.8,lat:19.1,ms:16},
+      {id:"sin",n:"Singapore",lon:103.8,lat:1.35,ms:15},
+      {id:"nrt",n:"Tokyo",lon:139.7,lat:35.7,ms:13},
+      {id:"syd",n:"Sydney",lon:151.2,lat:-33.9,ms:18}
+    ];
+    const hub=P(-0.1,51.5), placed=[];
+    const free=(x,y)=>{ for(const q of placed) if(Math.abs(q[0]-x)<96 && Math.abs(q[1]-y)<15) return false; return true; };
+    REG.forEach((r,i)=>{
+      const [x,y]=P(r.lon,r.lat);
+      const g=document.createElementNS(NS,"g");
+      const ring=document.createElementNS(NS,"circle");
+      ring.setAttribute("cx",x); ring.setAttribute("cy",y); ring.setAttribute("r",3.4);
+      ring.setAttribute("class","ring"+(i%2?" d2":"")); ring.style.animationDelay=(i*.42)+"s";
+      const pin=document.createElementNS(NS,"circle");
+      pin.setAttribute("cx",x); pin.setAttribute("cy",y); pin.setAttribute("r",2.6); pin.setAttribute("class","pin");
+      const right = x < 380;
+      const show = free(x,y); if(show) placed.push([x + (right?7.5:-7.5) + (right? r.n.length*6.6 : -r.n.length*6.6), y]);
+      const lb=document.createElementNS(NS,"text");
+      lb.setAttribute("x", right ? x+7.5 : x-7.5); lb.setAttribute("y", y+3.4);
+      lb.setAttribute("text-anchor", right ? "start" : "end");
+      lb.textContent = r.n+" · "+r.ms+"ms";
+      if(!show) lb.setAttribute("opacity","0");
+      const hit=document.createElementNS(NS,"circle");
+      hit.setAttribute("cx",x); hit.setAttribute("cy",y); hit.setAttribute("r",6); hit.setAttribute("class","hit");
+      const ttl=document.createElementNS(NS,"title"); ttl.textContent=r.n+" · "+r.ms+"ms p50 · healthy";
+      g.append(ring,pin,lb,hit); hit.appendChild(ttl); pins.appendChild(g);
+      if(i%2===0){
+        const [hx,hy]=hub, mx=(hx+x)/2, my=Math.min(hy,y)-Math.abs(hx-x)*.22;
+        const p=document.createElementNS(NS,"path");
+        p.setAttribute("d","M"+hx+" "+hy+" Q"+mx+" "+my+" "+x+" "+y); p.setAttribute("class","arc");
+        p.style.animationDelay=(i*-2)+"s"; arcs.appendChild(p);
+      }
+    });
+    if(chips) chips.innerHTML=[
+      ['g','41 regions · anycast'],
+      ['g','p50 11 ms · p99 74 ms'],
+      ['g','failover 0.8 s · no client impact'],
+      ['a','1 cold-standby zone per continent']
+    ].map(c=>'<span class="chip '+c[0]+'"><i></i>'+c[1]+'</span>').join("");
+  })();
+
+  /* ---------- code tabs ---------- */
+  (function(){
+    const tabs=$$('.code-tabs [role=tab]'); if(!tabs.length) return;
+    function sel(t){
+      tabs.forEach(x=>{
+        const on=x===t;
+        x.setAttribute("aria-selected",on?"true":"false");
+        const p=document.getElementById(x.getAttribute("aria-controls"));
+        if(p) p.hidden=!on;
+      });
+    }
+    tabs.forEach((t,i)=>{
+      t.addEventListener("click",()=>sel(t));
+      t.addEventListener("keydown",e=>{
+        const d=e.key==="ArrowRight"?1:e.key==="ArrowLeft"?-1:0;
+        if(!d) return; e.preventDefault();
+        const n=tabs[(i+d+tabs.length)%tabs.length]; n.focus(); sel(n);
+      });
+    });
+    const btn=$("#copy-btn");
+    btn.addEventListener("click",async()=>{
+      const panel=document.getElementById($$('.code-tabs [role=tab][aria-selected=true]')[0].getAttribute("aria-controls"));
+      const text=panel.querySelector("code").innerText;
+      try{ await navigator.clipboard.writeText(text); }
+      catch(_){ const ta=document.createElement("textarea"); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+      btn.querySelector("span").textContent="Copied ✓"; toast("Snippet copied to clipboard");
+      setTimeout(()=>btn.querySelector("span").textContent="Copy",1800);
+    });
+  })();
+  function toast(msg){
+    const t=$("#toast"); if(!t) return;
+    $("#toast-msg").textContent=msg; t.classList.add("show");
+    clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2200);
+  }
+
+  /* ---------- auth playground ---------- */
+  (function(){
+    const pipeEl=$("#pipe"), resEl=$("#res"), reqEl=$("#req"), verEl=$("#verdict"), noteEl=$("#note"), rtt=$("#rtt");
+    if(!pipeEl) return;
+    const STAGES=[
+      ["Signature window & replay guard","i-lock"],
+      ["Script + build resolution","i-layers"],
+      ["Key lookup (edge replica)","i-key"],
+      ["HWID + fingerprint binding","i-finger"],
+      ["Expiry, seats & instance caps","i-clock"],
+      ["Payload integrity / anti-tamper","i-shield-check"],
+      ["Token issued → payload dispatch","i-bolt"]
+    ];
+    const CHK='<svg aria-hidden="true"><use href="#i-check"/></svg>', XX='<svg aria-hidden="true"><use href="#i-x"/></svg>';
+    const S=(o)=>o;
+    const SC={
+      lifetime:S({
+        key:"NOVA-LIFE-4T7Q-B2X9", hwid:"b41f…9ac2", ok:true, rtt:11, note:"Self-contained token. Grace 24h — the loader survives our entire control plane being offline.",
+        body:{status:"SUCCESS",code:"OK",script:"8f2a-91c0-nova-hub",build:{id:"b-2291",version:"3.14.2",signed:true,vm:"luraph-class"},
+          key:{tier:"lifetime",expires:null,seats:1,used:1},hwid:{bound:"b41f…9ac2",trusted_since:"2025-04-11",resets_left:3},
+          vars:{tier:"premium",note:"affiliate:kyll",beta:true},ttl:3600,grace:86400,decoy:false,region:"fra1",trace:"tr_9c1f4e"}}),
+      daylock:S({
+        key:"NOVA-7Q2P-XK19-M4AZ", hwid:"b41f…9ac2", ok:true, rtt:12, note:"Day-locked key with 27d left — renewal nudge scheduled automatically at the 7-day mark.",
+        body:{status:"SUCCESS",code:"OK",script:"8f2a-91c0-nova-hub",build:{id:"b-2291",version:"3.14.2",signed:true},
+          key:{tier:"30d",expires:"2026-11-03T00:00:00Z",days_left:27,grace_used:0},
+          hwid:{bound:"b41f…9ac2",device_count:1},vars:{tier:"standard",note:"",beta:false},
+          renew:{url:"https://pay.sellix.io/nova-hub/30d",auto_webhook:true},ttl:3600,region:"fra1",trace:"tr_a71c02"}}),
+      expired:S({
+        key:"NOVA-3B8K-QQ01-L2M7", hwid:"b41f…9ac2", ok:false, failAt:4, rtt:8, note:"No kick, no crash: onFail() renders your own renewal UI because the response carries a remedy.",
+        body:{status:"KEY_EXPIRED",code:"EXPIRED",http:403,script:"8f2a-91c0-nova-hub",
+          key:{tier:"30d",expired_at:"2026-09-28T00:00:00Z",days_overdue:6,grace_remaining:0},
+          remedy:{action:"renew",url:"https://pay.sellix.io/nova-hub/30d",self_service:true},
+          webhook:"fired → #key-support",region:"fra1",trace:"tr_2e9b77"}}),
+      hwid:S({
+        key:"NOVA-9C4Z-0H2S-VP5X", hwid:"77c0…12ee", ok:false, failAt:3, rtt:9, note:"Key is valid but bound elsewhere — the shared-key reseller problem, solved without a support ticket.",
+        body:{status:"HWID_MISMATCH",code:"HWID_LOCKED",http:403,script:"8f2a-91c0-nova-hub",
+          expected:"b41f…9ac2",received:"77c0…12ee",bound_for:"27d",
+          remedy:{action:"reset_link",self_service:true,resets_left:2,cooldown_h:24,approval_required:false},
+          risk:{score:0.31,signals:["new-executor","ip-region-jump"]},region:"iad1",trace:"tr_6a0d18"}}),
+      tamper:S({
+        key:"NOVA-7Q2P-XK19-M4AZ", hwid:"b41f…9ac2", ok:false, failAt:5, rtt:14, note:"Integrity hash mismatch → the client gets a decoy build, so probing tells the leaker nothing.",
+        body:{status:"TAMPER_DETECTED",code:"INTEGRITY",http:422,script:"8f2a-91c0-nova-hub",
+          detail:"payload sha256 mismatch at byte 4,181 (loader patched)",
+          action:{served:"decoy_build",decoy:"b-0000-sinkhole",log_only:false},
+          enforcement:{key_frozen:true,ip_flagged:"91.23.14.*",reported_to:["owner","#abuse"]},region:"fra1",trace:"tr_dd41f0"}}),
+      killed:S({
+        key:"NOVA-7Q2P-XK19-M4AZ", hwid:"b41f…9ac2", ok:false, failAt:1, rtt:6, note:"Scoped to build >= b-2280 only — legitimate buyers on 3.14.2 are untouched.",
+        body:{status:"SCRIPT_DISABLED",code:"KILLED",http:410,script:"8f2a-91c0-nova-hub",
+          message:"This build was revoked by the author. Update to the latest loader.",
+          kill:{by:"n0va",at:"2026-10-04T09:41:07Z",scope:"build>=b-2280",propagated_ms:380},
+          affected_executions:1204,region:"edge (global)",trace:"tr_04b9cc"}}),
+      limit:S({
+        key:"NOVA-1M0T-XXXX-XXXX", hwid:"b41f…9ac2", ok:false, failAt:0, rtt:2, note:"Abuse protection runs before your key store is ever touched — 429 with a real retry hint, not a timeout.",
+        body:{status:"RATE_LIMITED",code:"TOO_MANY",http:429,
+          rule:"120 verify/min per IP · 400/min per key",retry_after_ms:1200,
+          backoff:"jittered-exponential, cap 30s",hint:"cache the token until ttl expires",region:"fra1",trace:"tr_8f2a01"}}),
+      ffa:S({
+        key:"(none — keyless mode)", hwid:"b41f…9ac2", ok:true, rtt:7, skip:[2,4],
+        note:"FFA keeps device binding and kill switch, drops the key gate — perfect for a free hub.",
+        body:{status:"SUCCESS",code:"OK",mode:"keyless_ffa",script:"8f2a-91c0-nova-hub-free",
+          build:{id:"b-1180",version:"2.9.0",signed:true},hwid:{bound:"b41f…9ac2",per_device:true},
+          key:null,limits:{instances_per_hwid:1,ads:"optional"},ttl:7200,region:"sin1",trace:"tr_5c11aa"}})
+    };
+    const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+    function hi(str){
+      return esc(str)
+        .replace(/"([^"\\]*(?:\\.[^"\\]*)*)"(\s*:)/g,'<span class="k">"$1"</span>$2')
+        .replace(/: "([^"]*)"/g,': <span class="s">"$1"</span>')
+        .replace(/: (\d+(\.\d+)?)/g,': <span class="n">$1</span>')
+        .replace(/: (true|false|null)/g,': <span class="b">$1</span>');
+    }
+    pipeEl.innerHTML=STAGES.map((s,i)=>'<li data-i="'+i+'"><span class="st">'+(CHK)+XX+'</span><span>'+s[0]+'</span><span class="ms"></span></li>').join("");
+    const LIS=$$("#pipe li");
+    let timer=[];
+    function run(name){
+      const sc=SC[name]; if(!sc) return;
+      timer.forEach(clearTimeout); timer=[];
+      LIS.forEach(li=>{li.className="";li.querySelector(".ms").textContent="";});
+      const req={script:"8f2a-91c0-nova-hub",build:"latest",key:sc.key,hwid:sc.hwid,
+        fp:{executor:"Delta",arch:"x86_64",session:412,region:"gb"},tamper:"sha256:0f91…c3d7"};
+      reqEl.innerHTML=hi("POST /v3/verify\n"+JSON.stringify(req,null,2));
+      verEl.innerHTML=""; resEl.textContent="…";
+      if(rtt) rtt.textContent="—";
+      sc.body.http=sc.body.http||200;
+      const base=RM?0:105;
+      STAGES.forEach((_,i)=>{
+        timer.push(setTimeout(()=>{
+          const li=LIS[i], skip=(sc.skip||[]).includes(i);
+          const after = sc.failAt!==null && sc.failAt!==undefined && i>sc.failAt;
+          if(sc.failAt===i){ li.className="fail"; li.querySelector(".ms").textContent="blocked"; }
+          else if(skip||after){ li.className="skip"; li.querySelector(".ms").textContent=after?"not reached":"skipped"; li.querySelector(".ms").style.opacity=1; }
+          else { li.className="pass"; li.querySelector(".ms").textContent=(sc.rtt/STAGES.length*(.7+Math.random()*.7)).toFixed(1)+"ms"; }
+          if(i===STAGES.length-1){
+            const ok=sc.ok;
+            verEl.innerHTML='<div class="verdict '+(ok?"ok":"no")+'"><svg aria-hidden="true"><use href="#'+(ok?"i-check":"i-x")+'"/></svg>'+
+              (ok?"200 · SUCCESS — payload dispatched":sc.body.http+" · "+sc.body.status)+
+              '<code>'+sc.body.code+'</code></div>';
+            resEl.innerHTML=hi(JSON.stringify(sc.body,null,2));
+            if(rtt) rtt.textContent=sc.rtt+" ms · edge "+(sc.body.region||"").split(" ")[0].slice(0,4);
+            if(noteEl) noteEl.innerHTML='<svg style="width:12px;height:12px"><use href="#i-spark"/></svg>'+sc.note;
+          }
+        },base+i*(RM?0:110)));
+      });
+    }
+    $$(".seg [data-sc]").forEach(b=>b.addEventListener("click",()=>{
+      $$(".seg [data-sc]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+      run(b.dataset.sc);
+    }));
+    const rp=$("#replay"); if(rp) rp.addEventListener("click",()=>{
+      const cur=$$(".seg [data-sc]").find(x=>x.getAttribute("aria-pressed")==="true"); run(cur.dataset.sc);
+    });
+    run("lifetime");
+  })();
+
+  /* ---------- pricing toggle ---------- */
+  (function(){
+    const pm=$("#pm"), pa=$("#pa"); if(!pm) return;
+    function set(annual){
+      pm.setAttribute("aria-pressed",String(!annual)); pa.setAttribute("aria-pressed",String(annual));
+      $$(".tier .v[data-m]").forEach(el=>{
+        const next=annual?el.dataset.a:el.dataset.m;
+        if(RM){ el.textContent=next; return; }
+        el.classList.add("flip");
+        setTimeout(()=>{ el.textContent=next; el.classList.remove("flip"); },170);
+      });
+      $$(".tier .billed[data-m]").forEach(el=>{ el.textContent=annual?el.dataset.a:el.dataset.m; });
+    }
+    pm.addEventListener("click",()=>set(false));
+    pa.addEventListener("click",()=>set(true));
+  })();
+
+  /* ---------- dust canvas ---------- */
+  if(!RM){
+    const cv=$("#dust");
+    if(cv && cv.getContext){
+      const ctx=cv.getContext("2d"); let w=0,h=0,pts=[];
+      function size(){
+        const dpr=Math.min(devicePixelRatio||1,1.75);
+        w=cv.width=innerWidth*dpr; h=cv.height=innerHeight*dpr;
+        ctx.setTransform(dpr,0,0,dpr,0,0); w/=dpr; h/=dpr;
+        const n=Math.min(84,Math.round(innerWidth/22));
+        pts=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5+.35,vx:(Math.random()-.5)*.16,vy:(Math.random()-.5)*.16,a:Math.random()*.5+.12}));
+      }
+      size(); addEventListener("resize",size);
+      (function draw(){
+        ctx.clearRect(0,0,w,h);
+        for(const p of pts){
+          p.x+=p.vx; p.y+=p.vy;
+          if(p.x<0)p.x=w; if(p.x>w)p.x=0; if(p.y<0)p.y=h; if(p.y>h)p.y=0;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.2832);
+          ctx.fillStyle="rgba(96,165,250,"+p.a+")"; ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      })();
+    }
+  }
+})();
+</script>
+<script src="/config.js"></script>
+<script type="module" src="/home-auth.js"></script>
+<script type="module" src="/service-status.js"></script>
+<script type="module" src="/home-navigation.js"></script>
+</body>
+</html>

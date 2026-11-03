@@ -1,0 +1,101 @@
+{
+  "info": {
+    "name": "Spider Hub Auth v4",
+    "description": "Run Request ticket, then Exchange ticket. Use a dedicated test license: successful auth can bind its HWID. Clear secrets before sharing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://spiderhub.xyz",
+      "type": "string"
+    },
+    {
+      "key": "script",
+      "value": "YOUR_SCRIPT_FILE_ID",
+      "type": "string"
+    },
+    {
+      "key": "key",
+      "value": "YOUR_LICENSE_KEY",
+      "type": "string"
+    },
+    {
+      "key": "hwid",
+      "value": "YOUR_DEVICE_ID",
+      "type": "string"
+    },
+    {
+      "key": "ticket",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Request ticket",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/files/v4/auth",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"script\": \"{{script}}\",\n  \"key\": \"{{key}}\",\n  \"hwid\": \"{{hwid}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.unset(\"ticket\");",
+              "const data = pm.response.json();",
+              "if (pm.response.code === 200 && data.success && data.ticket) pm.collectionVariables.set(\"ticket\", data.ticket);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exchange ticket",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/files/v4/auth",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"script\": \"{{script}}\",\n  \"key\": \"{{key}}\",\n  \"hwid\": \"{{hwid}}\",\n  \"ticket\": \"{{ticket}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
