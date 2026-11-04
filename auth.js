@@ -4,8 +4,9 @@ const message = document.querySelector('[data-auth-message]');
 const form = document.querySelector('[data-auth-form]');
 const submit = form?.querySelector('[type="submit"]');
 const discordButton = document.querySelector('[data-discord-login]');
-const dashboardUrl = new URL('/dashboard/', location.origin).href;
-const loginUrl = new URL('/login/', location.origin).href;
+const dashboardUrl = new URL('/dashboard/', window.location.origin).toString();
+const loginUrl = new URL('/login/', window.location.origin).toString();
+let discordRedirectStarted = false;
 
 function showMessage(text, success = false) {
   if (!message) return;
@@ -18,9 +19,17 @@ function friendlyError(error) {
     'Invalid login credentials': 'The email or password is incorrect.',
     'User already registered': 'An account already exists for this email. Try signing in instead.',
     'Email not confirmed': 'Please confirm your email using the link we sent you.',
-    'Unsupported provider': 'Discord sign-in is not enabled yet. Please contact the site owner.'
+    'Unsupported provider': 'Discord sign-in is not enabled in Supabase Auth yet. Please contact the site owner.',
+    'Provider is not enabled': 'Discord sign-in is not enabled in Supabase Auth yet. Please contact the site owner.'
   };
-  return known[error?.message] || error?.message || 'Something went wrong. Please try again.';
+  return known[error?.message] || 'Something went wrong. Please try again.';
+}
+
+function readOAuthError() {
+  const params = new URLSearchParams(location.search);
+  const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+  return params.get('error_description') || params.get('error') ||
+    hash.get('error_description') || hash.get('error');
 }
 
 async function start() {
@@ -37,9 +46,13 @@ async function start() {
       auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
     });
 
-    const callbackError = new URLSearchParams(location.search).get('error_description');
-    if (callbackError) showMessage('Discord sign-in could not be completed. Please try again.');
+    if (readOAuthError()) {
+      showMessage('Discord sign-in was not completed. Please try again or use email and password.');
+      history.replaceState(null, '', location.pathname);
+    }
 
+    // Supabase processes the OAuth callback and stores the authenticated session.
+    // If the callback lands on an auth page, continue to the protected dashboard.
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError) throw sessionError;
     if (session) {
@@ -48,7 +61,9 @@ async function start() {
     }
 
     discordButton?.addEventListener('click', async () => {
-      showMessage('Redirecting to Discord…');
+      if (discordRedirectStarted) return;
+      discordRedirectStarted = true;
+      showMessage('Redirecting to Discord…', true);
       discordButton.disabled = true;
       if (submit) submit.disabled = true;
       try {
@@ -61,12 +76,23 @@ async function start() {
           }
         });
         if (error) throw error;
+        // On success Supabase navigates to Discord. If it did not, restore the
+        // controls so the user can retry instead of leaving a stuck button.
+        window.setTimeout(() => {
+          if (document.visibilityState === 'visible') {
+            discordRedirectStarted = false;
+            discordButton.disabled = false;
+            if (submit) submit.disabled = false;
+            showMessage('Discord did not open. Check your connection and try again.');
+          }
+        }, 5000);
       } catch (error) {
+        discordRedirectStarted = false;
         showMessage(friendlyError(error));
         discordButton.disabled = false;
         if (submit) submit.disabled = false;
       }
-    });
+    }, { once: true });
 
     form?.addEventListener('submit', async event => {
       event.preventDefault();
@@ -102,7 +128,7 @@ async function start() {
         showMessage(friendlyError(error));
       } finally {
         submit.disabled = false;
-        if (discordButton) discordButton.disabled = false;
+        if (discordButton && !discordRedirectStarted) discordButton.disabled = false;
         submit.textContent = form.dataset.mode === 'signup' ? 'Create account' : 'Sign in';
       }
     });
