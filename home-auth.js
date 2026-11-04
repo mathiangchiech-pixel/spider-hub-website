@@ -1,10 +1,13 @@
-// Redirect returning users only from the landing page. Docs stay readable.
-const cfg = window.LUASECURE_CONFIG || {};
-if (location.pathname === '/' && !location.hash && cfg.SUPABASE_URL && !cfg.SUPABASE_URL.includes('YOUR-PROJECT-REF')) {
+// Redirect signed-in visitors from the landing page to their account dashboard.
+// Public pages and documentation remain available to everyone.
+const cfg = window.SPIDER_HUB_CONFIG || {};
+if (location.pathname === '/' && cfg.SUPABASE_URL && cfg.SUPABASE_PUBLISHABLE_KEY) {
   try {
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    const client = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-    const redirect = session => { if (session) location.replace('/dashboard/overview'); };
+    const client = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_PUBLISHABLE_KEY, {
+      auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
+    });
+    const redirect = session => { if (session) location.replace('/dashboard/'); };
     const { data, error } = await client.auth.getSession();
     if (!error) redirect(data.session);
     client.auth.onAuthStateChange((_event, session) => redirect(session));

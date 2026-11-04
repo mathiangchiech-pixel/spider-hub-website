@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>Sign in · Spider Hub</title>
+  <link rel="icon" href="/logo.webp">
+  <link rel="stylesheet" href="/auth.css">
+  <script src="/config.js"></script>
+  <script type="module" src="/auth.js"></script>
+</head>
+<body>
+  <main class="auth-shell">
+    <section class="auth-story" aria-label="Spider Hub">
+      <a class="brand" href="/" aria-label="Spider Hub home"><img src="/logo.webp" alt=""><span>Spider Hub</span></a>
+      <div class="story-copy">
+        <div class="eyebrow">Your scripts. Your control.</div>
+        <h1>Welcome back to <span>Spider Hub.</span></h1>
+        <p>Sign in to manage your Spider Hub account. Authentication is powered by your own Supabase project.</p>
+      </div>
+      <p class="story-foot">© Spider Hub · Secure account access</p>
+    </section>
+    <section class="auth-side" aria-label="Sign in form">
+      <div class="auth-card">
+        <h2>Sign in</h2>
+        <p class="auth-subtitle">Use the email and password for your account.</p>
+        <form data-auth-form data-mode="login">
+          <div class="field"><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+          <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" required></div>
+          <button class="auth-submit" type="submit">Sign in</button>
+          <p class="auth-message" data-auth-message role="status" aria-live="polite"></p>
+        </form>
+        <p class="auth-switch">New to Spider Hub? <a href="/register/">Create an account</a></p>
+        <div class="secure-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>Sign-in is handled by Supabase Auth. Spider Hub never sees or stores your password.</div>
+        <a class="back-home" href="/">← Back to Spider Hub</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
