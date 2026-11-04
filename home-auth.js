@@ -1,115 +1,79 @@
-// Spider Websites homepage copy, navbar branding, Discord invite links, and session redirect.
+// Lightweight Spider Websites homepage copy, button links and signed-in redirect.
+// This file intentionally uses no MutationObserver or click interception: primary
+// actions remain native links so mobile browsers can navigate without delay.
 const config = window.SPIDER_HUB_CONFIG || {};
 const DISCORD_INVITE = 'https://discord.gg/dVUtXEGGf';
 
-function updateHomepageCopy() {
+function initializeHomepageActions() {
   if (location.pathname !== '/') return;
+
+  const brand = document.querySelector('.nav .logo b');
+  if (brand && brand.dataset.brandInitialized !== 'true') {
+    brand.textContent = 'Spider Web';
+    brand.dataset.brandInitialized = 'true';
+  }
 
   const heading = document.querySelector('.hero h1');
   const description = document.querySelector('.hero .lede');
   const actions = document.querySelector('.hero .hero-cta');
-  if (!heading || !description || !actions) return;
 
-  heading.textContent = 'Welcome to Spider Websites';
-  description.textContent = 'Your home for premium scripts, secure license management and powerful tools. Join our community to stay updated!';
-
-  const discord = document.createElement('a');
-  discord.className = 'btn btn-primary btn-lg';
-  discord.href = DISCORD_INVITE;
-  discord.target = '_blank';
-  discord.rel = 'noopener noreferrer';
-  discord.textContent = 'Join Our Discord';
-
-  const plans = document.createElement('a');
-  plans.className = 'btn btn-ghost btn-lg';
-  plans.href = '/pricing';
-  plans.textContent = 'Explore Plans';
-
-  actions.replaceChildren(discord, plans);
-
-  let note = document.querySelector('[data-community-note]');
-  if (!note) {
-    note = document.createElement('p');
-    note.dataset.communityNote = '';
-    note.style.cssText = 'margin-top:14px;color:var(--ink-3);font-size:13px';
-    actions.insertAdjacentElement('afterend', note);
+  if (heading && heading.textContent.trim() !== 'Welcome to Spider Websites') {
+    heading.replaceChildren(document.createTextNode('Welcome to Spider Websites'));
   }
-  note.textContent = 'Get updates, announcements, support and news in our Discord community.';
-}
+  if (description && description.textContent.trim() !== 'Your home for premium scripts, secure license management and powerful tools. Join our community to stay updated!') {
+    description.textContent = 'Your home for premium scripts, secure license management and powerful tools. Join our community to stay updated!';
+  }
 
-function updateBrandAndDiscordLinks(root = document) {
-  const brand = document.querySelector('.nav .logo b');
-  if (brand) {
-    const name = brand.firstChild;
-    if (name?.nodeType === Node.TEXT_NODE) name.nodeValue = 'Spider';
-    else brand.insertBefore(document.createTextNode('Spider'), brand.firstChild);
-    let suffix = brand.querySelector('span');
-    if (!suffix) {
-      suffix = document.createElement('span');
-      brand.append(suffix);
+  if (actions && actions.dataset.actionsInitialized !== 'true') {
+    const discord = document.createElement('a');
+    discord.className = 'btn btn-primary btn-lg';
+    discord.href = DISCORD_INVITE;
+    discord.target = '_blank';
+    discord.rel = 'noopener noreferrer';
+    discord.textContent = 'Join Our Discord';
+
+    const plans = document.createElement('a');
+    plans.className = 'btn btn-ghost btn-lg';
+    plans.href = '/pricing';
+    plans.textContent = 'Explore Plans';
+
+    actions.replaceChildren(discord, plans);
+    actions.dataset.actionsInitialized = 'true';
+
+    let note = document.querySelector('[data-community-note]');
+    if (!note) {
+      note = document.createElement('p');
+      note.dataset.communityNote = '';
+      note.style.cssText = 'margin-top:14px;color:var(--ink-3);font-size:13px';
+      actions.insertAdjacentElement('afterend', note);
     }
-    suffix.textContent = ' Web';
+    note.textContent = 'Get updates, announcements, support and news in our Discord community.';
   }
 
-  const anchors = root.querySelectorAll ? [
-    ...(root instanceof HTMLAnchorElement ? [root] : []),
-    ...root.querySelectorAll('a[href]')
-  ] : [];
-  for (const anchor of anchors) {
-    const href = anchor.getAttribute('href') || '';
-    const label = (anchor.textContent || '').trim();
-    let isDiscordLink = false;
+  // Keep the dashboard action a direct native navigation (including mobile).
+  document.querySelectorAll('a[href="/dashboard"], a[href="/dashboard/"]').forEach(link => {
+    link.setAttribute('href', '/dashboard/');
+  });
+
+  // Preserve the existing convenience redirect without blocking rendering or clicks.
+  if (!config.SUPABASE_URL || !config.SUPABASE_PUBLISHABLE_KEY || window.__spiderHomeSessionCheckStarted) return;
+  window.__spiderHomeSessionCheckStarted = true;
+  const checkSession = async () => {
     try {
-      const target = new URL(href, location.href);
-      isDiscordLink = /(^|\.)discord\.gg$/i.test(target.hostname) ||
-        (/discord\.com$/i.test(target.hostname) && /\/invite\//i.test(target.pathname));
-    } catch { /* Leave invalid and non-Discord URLs untouched. */ }
-
-    const isDiscordCommunityButton = /^(join\s+(our\s+)?discord|discord\s+updates|support|community)$/i.test(label);
-    if (isDiscordLink || isDiscordCommunityButton) {
-      anchor.href = DISCORD_INVITE;
-      if (anchor === document.querySelector('.hero .hero-cta a')) {
-        anchor.target = '_blank';
-        anchor.rel = 'noopener noreferrer';
-      }
-    }
-  }
-}
-
-function updateHomepage() {
-  updateHomepageCopy();
-  updateBrandAndDiscordLinks();
-}
-
-updateHomepage();
-const brandingObserver = new MutationObserver(records => {
-  for (const record of records) {
-    if (record.type === 'childList') {
-      record.addedNodes.forEach(node => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          updateHomepageCopy();
-          updateBrandAndDiscordLinks(node);
-        }
+      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+      const client = createClient(config.SUPABASE_URL, config.SUPABASE_PUBLISHABLE_KEY, {
+        auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
       });
-    } else if (record.type === 'attributes' && record.target instanceof HTMLAnchorElement) {
-      updateBrandAndDiscordLinks(record.target);
-    }
-  }
-});
-brandingObserver.observe(document.documentElement, {
-  subtree: true, childList: true, attributes: true, attributeFilter: ['href']
-});
+      const { data, error } = await client.auth.getSession();
+      if (!error && data.session) location.replace('/dashboard/');
+    } catch { /* Session lookup must never interfere with public page actions. */ }
+  };
+  if ('requestIdleCallback' in window) requestIdleCallback(checkSession, { timeout: 1800 });
+  else setTimeout(checkSession, 700);
+}
 
-// Signed-in visitors are sent to their dashboard; public pages remain accessible.
-if (location.pathname === '/' && config.SUPABASE_URL && config.SUPABASE_PUBLISHABLE_KEY) {
-  try {
-    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    const client = createClient(config.SUPABASE_URL, config.SUPABASE_PUBLISHABLE_KEY, {
-      auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
-    });
-    const redirect = session => { if (session) location.replace('/dashboard/'); };
-    const { data, error } = await client.auth.getSession();
-    if (!error) redirect(data.session);
-    client.auth.onAuthStateChange((_event, session) => redirect(session));
-  } catch { /* A failed session check must not hide the public site. */ }
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeHomepageActions, { once: true });
+} else {
+  initializeHomepageActions();
 }
