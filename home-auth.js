@@ -1,55 +1,54 @@
-// Spider Hub homepage session redirect and shared legacy-brand cleanup.
-// This rewrites only rendered branding; application code and public content remain intact.
+// Spider Hub homepage session redirect and precise navbar/Discord link updates.
 const config = window.SPIDER_HUB_CONFIG || {};
+const DISCORD_INVITE = 'https://discord.gg/dVUtXEGGf';
 
-function applySpiderWebsitesBranding(root = document) {
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  let node;
-  while ((node = walker.nextNode())) {
-    if (!node.parentElement?.closest('script,style,noscript')) {
-      node.nodeValue = node.nodeValue.replace(/lua[\s-]*secure/gi, 'Spider Websites');
+function updateBrandAndDiscordLinks(root = document) {
+  const brand = document.querySelector('.nav .logo b');
+  if (brand) {
+    const name = brand.firstChild;
+    if (name?.nodeType === Node.TEXT_NODE) name.nodeValue = 'Spider';
+    else brand.insertBefore(document.createTextNode('Spider'), brand.firstChild);
+    let suffix = brand.querySelector('span');
+    if (!suffix) {
+      suffix = document.createElement('span');
+      brand.append(suffix);
     }
+    suffix.textContent = ' Web';
   }
 
-  const elements = root.querySelectorAll ? [
-    ...(root.matches?.('*') ? [root] : []),
-    ...root.querySelectorAll('*')
+  const anchors = root.querySelectorAll ? [
+    ...(root instanceof HTMLAnchorElement ? [root] : []),
+    ...root.querySelectorAll('a[href]')
   ] : [];
-  for (const element of elements) {
-    for (const attribute of ['alt', 'title', 'aria-label', 'content']) {
-      const value = element.getAttribute?.(attribute);
-      if (value && /lua[\s-]*secure/i.test(value)) {
-        element.setAttribute(attribute, value.replace(/lua[\s-]*secure/gi, 'Spider Websites'));
-      }
-    }
-    if (element instanceof HTMLImageElement && /(?:^|\/)logo\.webp(?:[?#].*)?$/i.test(element.getAttribute('src') || '')) {
-      element.src = '/logo.svg';
-    }
-  }
-  if (document.title && /lua[\s-]*secure/i.test(document.title)) {
-    document.title = document.title.replace(/lua[\s-]*secure/gi, 'Spider Websites');
+  for (const anchor of anchors) {
+    const href = anchor.getAttribute('href') || '';
+    const label = (anchor.textContent || '').trim();
+    let isDiscordLink = false;
+    try {
+      const target = new URL(href, location.href);
+      isDiscordLink = /(^|\.)discord\.gg$/i.test(target.hostname) ||
+        (/discord\.com$/i.test(target.hostname) && /\/invite\//i.test(target.pathname));
+    } catch { /* Leave invalid and non-Discord URLs untouched. */ }
+
+    const isDiscordCommunityButton = /^(join\s+discord|discord\s+updates|support|community)$/i.test(label);
+    if (isDiscordLink || isDiscordCommunityButton) anchor.href = DISCORD_INVITE;
   }
 }
 
-applySpiderWebsitesBranding();
+updateBrandAndDiscordLinks();
 const brandingObserver = new MutationObserver(records => {
   for (const record of records) {
     if (record.type === 'childList') {
       record.addedNodes.forEach(node => {
-        if (node.nodeType === Node.TEXT_NODE && !node.parentElement?.closest('script,style,noscript')) {
-          node.nodeValue = node.nodeValue.replace(/lua[\s-]*secure/gi, 'Spider Websites');
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          applySpiderWebsitesBranding(node);
-        }
+        if (node.nodeType === Node.ELEMENT_NODE) updateBrandAndDiscordLinks(node);
       });
-    } else if (record.type === 'attributes') {
-      applySpiderWebsitesBranding(record.target);
+    } else if (record.type === 'attributes' && record.target instanceof HTMLAnchorElement) {
+      updateBrandAndDiscordLinks(record.target);
     }
   }
 });
 brandingObserver.observe(document.documentElement, {
-  subtree: true, childList: true, attributes: true,
-  attributeFilter: ['alt', 'title', 'aria-label', 'content', 'src']
+  subtree: true, childList: true, attributes: true, attributeFilter: ['href']
 });
 
 // Signed-in visitors are sent to their dashboard; public pages remain accessible.
