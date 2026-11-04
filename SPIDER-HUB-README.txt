@@ -1,25 +1,26 @@
-SPIDER HUB - CUSTOMIZED WEBSITE STARTER
+# Spider Websites: Discord OAuth, dashboard and owner controls
 
-This is a rebranded copy of the website files supplied in the conversation.
-It is a FRONT-END STARTER, not a finished service.
+This update adds the account/dashboard UI and server-verified Discord OAuth plus owner-only plan and license management. It uses only this project's Supabase instance; it does not call LuaSecure services.
 
-Implemented:
-- email/password signup, login and logout using the existing Supabase project
-- Supabase-authenticated dashboard landing page
-- mobile-friendly black, red and white account pages
-- Spider Hub branding with a custom web emblem
-- visible legacy LuaSecure labels are rendered as Spider Websites on site pages
+## Files added/changed
+- `supabase/schema.sql` — profiles, subscription, scripts, license metadata, one-time OAuth state tables; RLS and read-only user policies; owner-check and state-consume SQL functions.
+- `supabase/config.toml` — permits Discord's redirect callback to reach the OAuth function without a Supabase JWT; the function itself validates the one-time OAuth state.
+- `supabase/functions/discord-oauth/index.ts` — authenticated OAuth start/disconnect, server-side Discord code exchange, identity lookup and profile linking. Discord access tokens are not stored.
+- `supabase/functions/owner-admin/index.ts` — verifies Supabase JWT and `owner_accounts` on every request; supports user search/list, plan changes and license key create/revoke.
+- `dashboard/index.html`, `dashboard.js` — responsive user dashboard with Discord link status, scripts, subscription, license metadata and logout.
+- `owner/index.html`, `owner.js` — owner control panel with Discord-ID search, plan controls and key management.
 
-The auth flow talks directly to your Supabase project. It does not use LuaSecure's servers, API, or database. config.js contains the Supabase URL and public/publishable key only. Never put a Supabase secret/service_role key in public website files.
+## Required deployment setup
+1. Run `supabase/schema.sql` in the Supabase SQL editor. Review it against any existing production schema before running it.
+2. Deploy both functions: `supabase functions deploy discord-oauth` and `supabase functions deploy owner-admin`.
+3. Set Edge Function secrets; never commit these values:
+   - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+   - `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`
+   - `APP_URL` (the exact public website origin, e.g. `https://spiderhub.xyz`)
+4. In the Discord Developer Portal, configure the OAuth2 redirect URI as `https://feltpayvtjzuxkdxkixy.supabase.co/functions/v1/discord-oauth`. Enable the `identify` scope only.
+5. In Supabase Auth URL settings, allow your deployed dashboard URL and local dev URL as appropriate.
+6. After registering your own user, add its UUID (from Supabase Auth → Users) as the sole authorized owner. Do this manually in the SQL editor; do not expose owner assignment in the website:
+   `insert into public.owner_accounts (user_id) values ('YOUR-AUTH-USER-UUID');`
+7. Keep RLS enabled. Normal accounts cannot write plans, owner records, OAuth state, or license keys. The owner Edge Function separately verifies owner authorization before every privileged action.
 
-The provided reference artwork could not be uploaded as a binary image with the available repository editor, so logo.svg is an original Spider Websites web emblem. Replace logo.svg with the reference image file (keeping the filename) to use the exact supplied art.
-
-Before publicly distributing or commercially using the original package, verify that you have permission/license rights to modify and reuse its source files.
-
-SUPABASE SETUP
-1. In Supabase Authentication settings, enable the Email provider.
-2. Set the Site URL to your deployed Spider Hub website origin.
-3. Add the deployed origin and https://YOUR-DOMAIN/dashboard/ to the allowed redirect URLs. Also add your local development URL if needed.
-4. Review whether email confirmation should be required. With confirmations enabled, new users will receive a confirmation email before completing sign-in.
-5. Keep Row Level Security enabled and add appropriate policies before connecting private user data to the dashboard. A client-side route guard is not a substitute for database authorization.
-6. Serve the website over HTTPS in production.
+The `user_scripts` table is a safe metadata placeholder; no source upload/execution service is added. License keys are stored as SHA-256 hashes and only shown in full once to the owner at creation. A key hash alone does not provide key validation; implement a dedicated server-side validator before using these keys for access control. Use HTTPS in production and rotate credentials if any secret has ever been exposed.

@@ -1,0 +1,7 @@
+project_id = "feltpayvtjzuxkdxkixy"
+
+[functions.discord-oauth]
+verify_jwt = false
+
+[functions.owner-admin]
+verify_jwt = false
