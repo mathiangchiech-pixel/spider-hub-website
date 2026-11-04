@@ -23,18 +23,36 @@ async function startDashboard() {
     const supabase = createClient(config.SUPABASE_URL, config.SUPABASE_PUBLISHABLE_KEY, { auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true } });
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error || !user) { location.replace(loginUrl); return; }
-    document.querySelector('[data-user-email]').textContent = user.email || 'Signed in';
+
+    const discordProvider = user.app_metadata?.providers?.includes('discord');
+    const discordName = user.user_metadata?.global_name || user.user_metadata?.username || user.user_metadata?.full_name || user.email || 'Signed in';
+    const discordAvatar = user.user_metadata?.avatar_url;
+    const accountLabel = document.querySelector('[data-user-email]');
+    accountLabel.textContent = discordProvider ? discordName : (user.email || 'Signed in');
+    accountLabel.title = user.email || user.id;
+    const avatar = document.querySelector('[data-user-avatar]');
+    if (discordProvider && typeof discordAvatar === 'string' && /^https:\/\//.test(discordAvatar)) {
+      avatar.src = discordAvatar;
+      avatar.alt = `${discordName} Discord avatar`;
+      avatar.hidden = false;
+    }
 
     const discordStatus = document.querySelector('[data-discord-status]');
-    const discordName = document.querySelector('[data-discord-name]');
+    const discordNameElement = document.querySelector('[data-discord-name]');
     const discordMessage = document.querySelector('[data-discord-message]');
     const connect = document.querySelector('[data-discord-connect]');
     const disconnect = document.querySelector('[data-discord-disconnect]');
     const { data: profile } = await supabase.from('profiles').select('discord_id,discord_username,discord_global_name,discord_avatar,discord_connected_at').eq('user_id', user.id).maybeSingle();
-    if (profile?.discord_id) {
+    const linkedDiscord = profile?.discord_id || (discordProvider ? user.user_metadata?.sub : null);
+    const linkedName = profile?.discord_global_name || profile?.discord_username || discordName;
+    const linkedAvatar = profile?.discord_avatar ? `https://cdn.discordapp.com/avatars/${profile.discord_id}/${profile.discord_avatar}.png` : discordAvatar;
+    if (linkedDiscord) {
       discordStatus.textContent = 'Connected'; discordStatus.classList.add('status-good');
-      discordName.textContent = `${profile.discord_global_name || profile.discord_username} · Discord ID ${profile.discord_id}`;
+      discordNameElement.textContent = `${linkedName} · Discord ID ${linkedDiscord}`;
       connect.textContent = 'Reconnect Discord'; disconnect.hidden = false;
+      if (typeof linkedAvatar === 'string' && /^https:\/\//.test(linkedAvatar)) {
+        avatar.src = linkedAvatar; avatar.alt = `${linkedName} Discord avatar`; avatar.hidden = false;
+      }
     }
     const params = new URLSearchParams(location.search);
     const discordResult = params.get('discord');
@@ -51,7 +69,7 @@ async function startDashboard() {
       const { data, error } = await supabase.functions.invoke('discord-oauth', { body: { action: 'disconnect' } });
       if (error || data?.error) { discordMessage.textContent = data?.error || 'Could not disconnect Discord.'; disconnect.disabled = false; return; }
       discordStatus.textContent = 'Not connected'; discordStatus.classList.remove('status-good');
-      discordName.textContent = 'Link your Discord account to connect it to your Spider Websites profile.';
+      discordNameElement.textContent = 'Link your Discord account to connect it to your Spider Websites profile.';
       connect.textContent = 'Continue with Discord'; disconnect.hidden = true; disconnect.disabled = false;
       discordMessage.textContent = 'Discord was disconnected.';
     });

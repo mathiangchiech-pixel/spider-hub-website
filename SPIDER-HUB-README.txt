@@ -1,26 +1,19 @@
-# Spider Websites: Discord OAuth, dashboard and owner controls
+# Spider Websites: Discord authentication
 
-This update adds the account/dashboard UI and server-verified Discord OAuth plus owner-only plan and license management. It uses only this project's Supabase instance; it does not call LuaSecure services.
+Email/password sign-in remains available. The login and registration pages also offer Discord sign-in through Supabase Auth's official Discord OAuth provider; the client secret stays in Supabase's server-side provider configuration and is never shipped to browser code.
 
-## Files added/changed
-- `supabase/schema.sql` — profiles, subscription, scripts, license metadata, one-time OAuth state tables; RLS and read-only user policies; owner-check and state-consume SQL functions.
-- `supabase/config.toml` — permits Discord's redirect callback to reach the OAuth function without a Supabase JWT; the function itself validates the one-time OAuth state.
-- `supabase/functions/discord-oauth/index.ts` — authenticated OAuth start/disconnect, server-side Discord code exchange, identity lookup and profile linking. Discord access tokens are not stored.
-- `supabase/functions/owner-admin/index.ts` — verifies Supabase JWT and `owner_accounts` on every request; supports user search/list, plan changes and license key create/revoke.
-- `dashboard/index.html`, `dashboard.js` — responsive user dashboard with Discord link status, scripts, subscription, license metadata and logout.
-- `owner/index.html`, `owner.js` — owner control panel with Discord-ID search, plan controls and key management.
+## Files changed
+- `login/index.html` — added the responsive Discord sign-in button while preserving email/password login.
+- `register/index.html` — added Discord account creation/sign-in while preserving email/password registration.
+- `auth.css` — styles the Discord button and separator for the existing mobile-friendly theme.
+- `auth.js` — calls Supabase Auth `signInWithOAuth` using provider `discord` and redirects back to the dashboard. OAuth exchange/session handling is performed by Supabase Auth.
+- `dashboard/index.html` and `dashboard.js` — render the Discord account username and avatar from the authenticated Supabase user/provider metadata when available.
 
-## Required deployment setup
-1. Run `supabase/schema.sql` in the Supabase SQL editor. Review it against any existing production schema before running it.
-2. Deploy both functions: `supabase functions deploy discord-oauth` and `supabase functions deploy owner-admin`.
-3. Set Edge Function secrets; never commit these values:
-   - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-   - `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`
-   - `APP_URL` (the exact public website origin, e.g. `https://spiderhub.xyz`)
-4. In the Discord Developer Portal, configure the OAuth2 redirect URI as `https://feltpayvtjzuxkdxkixy.supabase.co/functions/v1/discord-oauth`. Enable the `identify` scope only.
-5. In Supabase Auth URL settings, allow your deployed dashboard URL and local dev URL as appropriate.
-6. After registering your own user, add its UUID (from Supabase Auth → Users) as the sole authorized owner. Do this manually in the SQL editor; do not expose owner assignment in the website:
-   `insert into public.owner_accounts (user_id) values ('YOUR-AUTH-USER-UUID');`
-7. Keep RLS enabled. Normal accounts cannot write plans, owner records, OAuth state, or license keys. The owner Edge Function separately verifies owner authorization before every privileged action.
+## Supabase setup required before it works
+1. In Supabase Dashboard → Authentication → Sign In / Providers, enable Discord.
+2. Enter the Discord application Client ID and Client Secret in Supabase's provider settings. Do not put the Client Secret in `config.js`, browser HTML, or JavaScript.
+3. In Discord Developer Portal, add the Supabase Auth callback URL shown by the provider setup page to the OAuth2 redirect allowlist. Configure Discord email access if you want Supabase to receive verified email addresses.
+4. In Supabase Auth URL Configuration, set the website Site URL and allow the deployed `https://YOUR-DOMAIN/dashboard/` redirect (plus local development URLs if needed).
+5. Deploy the changed static website files and test a new Discord user and a returning user on desktop and Android.
 
-The `user_scripts` table is a safe metadata placeholder; no source upload/execution service is added. License keys are stored as SHA-256 hashes and only shown in full once to the owner at creation. A key hash alone does not provide key validation; implement a dedicated server-side validator before using these keys for access control. Use HTTPS in production and rotate credentials if any secret has ever been exposed.
+This change uses Supabase Auth's supported OAuth flow rather than simulating Discord login. The existing `discord-oauth` Edge Function is still for linking/disconnecting Discord on a user who is already signed in; it is not used as a substitute for provider authentication. Linking an existing email/password identity to a Discord identity may require a separate explicit account-link flow; the sign-in button alone should not be represented as silently merging accounts. No live OAuth test was run here, and it will not work until the Supabase and Discord provider settings above are configured.

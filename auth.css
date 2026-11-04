@@ -1,4 +1,4 @@
-/* Spider Hub authentication pages */
+/* Spider Websites authentication pages */
 :root {
   color-scheme: dark;
   --auth-bg: #080808;
@@ -34,7 +34,13 @@ button, input { font: inherit; }
 .auth-side { display: grid; place-items: center; padding: 32px 24px; }
 .auth-card { width: min(100%, 440px); padding: clamp(24px, 4vw, 38px); border: 1px solid var(--auth-line); border-radius: 22px; background: var(--auth-panel); box-shadow: 0 30px 90px rgba(0,0,0,.48); backdrop-filter: blur(16px); }
 .auth-card h2 { margin: 0; font-size: 29px; letter-spacing: -.045em; }
-.auth-subtitle { margin: 9px 0 27px; color: var(--auth-muted); font-size: 14px; }
+.auth-subtitle { margin: 9px 0 22px; color: var(--auth-muted); font-size: 14px; }
+.discord-auth { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 54px; padding: 12px 16px; border: 1px solid rgba(255,255,255,.16); border-radius: 11px; color: #fff; background: #171717; font-weight: 700; cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
+.discord-auth:hover { background: #242424; border-color: rgba(255,255,255,.3); transform: translateY(-1px); }
+.discord-auth:disabled { opacity: .65; cursor: wait; transform: none; }
+.discord-auth svg { width: 23px; height: 23px; flex: none; color: #fff; }
+.auth-divider { display: flex; align-items: center; gap: 12px; margin: 22px 0; color: #858585; font-size: 11px; white-space: nowrap; }
+.auth-divider::before, .auth-divider::after { content: ""; height: 1px; flex: 1; background: var(--auth-line); }
 .field { display: grid; gap: 8px; margin: 17px 0; }
 .field label { color: #e8e8e8; font-size: 13px; font-weight: 600; }
 .field input { width: 100%; min-height: 49px; padding: 12px 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 10px; outline: none; color: #fff; background: #0c0c0c; transition: border-color .2s, box-shadow .2s; }

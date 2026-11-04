@@ -13,9 +13,11 @@
     .dash-list{display:grid;gap:9px;margin:17px 0 0;padding:0;list-style:none}
     .dash-list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 12px;border:1px solid rgba(255,255,255,.09);border-radius:10px;color:#ddd;font-size:13px;overflow-wrap:anywhere}
     .muted{color:#999!important}.badge{display:inline-flex;padding:4px 8px;border:1px solid rgba(255,90,90,.32);border-radius:99px;color:#ff9b9b;font-size:11px;white-space:nowrap}
-    .button-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.button-row button{padding:9px 12px;border:1px solid rgba(255,255,255,.17);border-radius:9px;color:white;background:#181818;cursor:pointer}.button-row button.primary{border-color:transparent;background:#d52b35}
+    .button-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.button-row button{padding:9px 12px;border:1px solid rgba(255,255,255,.17);border-radius:9px;color:white;background:#181818;cursor:pointer}
+    .button-row button.primary{border-color:transparent;background:#d52b35}
     [data-discord-message],[data-owner-message]{min-height:20px;margin-top:12px;color:#ffaaaa;font-size:13px}.status-good{color:#a7f3d0!important}
     .key-code{font-family:ui-monospace,monospace;color:#ffc0c0}.owner-entry{margin-top:22px}
+    .account-identity{display:flex;align-items:center;gap:9px;min-width:0}.account-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.16)}
     @media(max-width:680px){.dash-grid{grid-template-columns:1fr}.dash-nav{flex-wrap:wrap}.dash-nav>div{flex-wrap:wrap;justify-content:flex-end}}
   </style>
   <script src="/config.js"></script>
@@ -25,7 +27,7 @@
   <main class="dashboard-shell" data-dashboard hidden>
     <header class="dash-nav">
       <a class="brand" href="/" aria-label="Spider Websites home"><img src="/logo.svg" alt=""><span>Spider Websites</span></a>
-      <div style="display:flex;align-items:center;gap:14px"><span class="dash-user" data-user-email></span><a class="logout-button" href="/owner/" data-owner-link hidden>Owner panel</a><button class="logout-button" type="button" data-logout>Log out</button></div>
+      <div style="display:flex;align-items:center;gap:14px"><span class="account-identity"><img class="account-avatar" data-user-avatar alt="" hidden><span class="dash-user" data-user-email></span></span><a class="logout-button" href="/owner/" data-owner-link hidden>Owner panel</a><button class="logout-button" type="button" data-logout>Log out</button></div>
     </header>
     <section class="dash-content">
       <div class="eyebrow">Account dashboard</div>

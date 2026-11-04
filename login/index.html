@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080808">
-  <title>Sign in · Spider Hub</title>
+  <title>Sign in · Spider Websites</title>
   <link rel="icon" href="/logo.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/auth.css">
   <script src="/config.js"></script>
@@ -12,28 +12,33 @@
 </head>
 <body>
   <main class="auth-shell">
-    <section class="auth-story" aria-label="Spider Hub">
-      <a class="brand" href="/" aria-label="Spider Hub home"><img src="/logo.svg" alt=""><span>Spider Hub</span></a>
+    <section class="auth-story" aria-label="Spider Websites">
+      <a class="brand" href="/" aria-label="Spider Websites home"><img src="/logo.svg" alt=""><span>Spider Websites</span></a>
       <div class="story-copy">
         <div class="eyebrow">Your scripts. Your control.</div>
-        <h1>Welcome back to <span>Spider Hub.</span></h1>
-        <p>Sign in to manage your Spider Hub account. Authentication is powered by your own Supabase project.</p>
+        <h1>Welcome back to <span>Spider Websites.</span></h1>
+        <p>Sign in securely with Discord or use your email and password.</p>
       </div>
-      <p class="story-foot">© Spider Hub · Secure account access</p>
+      <p class="story-foot">© Spider Websites · Secure account access</p>
     </section>
     <section class="auth-side" aria-label="Sign in form">
       <div class="auth-card">
         <h2>Sign in</h2>
-        <p class="auth-subtitle">Use the email and password for your account.</p>
+        <p class="auth-subtitle">Continue securely to your account.</p>
+        <button class="discord-auth" type="button" data-discord-login>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M19.7 5.2A18.8 18.8 0 0 0 15.1 3.8l-.6 1.2a17.2 17.2 0 0 0-5 0l-.6-1.2a18.8 18.8 0 0 0-4.6 1.4C1.4 9.5.6 13.7 1 17.8a18.6 18.6 0 0 0 5.7 2.9l1.2-1.9-1.8-.9.4-.3c3.5 1.6 7.3 1.6 10.8 0l.4.3-1.8.9 1.2 1.9a18.6 18.6 0 0 0 5.7-2.9c.5-4.8-.8-8.9-3.1-12.6ZM8.7 15.5c-1.1 0-2-1-2-2.2s.9-2.2 2-2.2 2 1 2 2.2-.9 2.2-2 2.2Zm6.6 0c-1.1 0-2-1-2-2.2s.9-2.2 2-2.2 2 1 2 2.2-.9 2.2-2 2.2Z"/></svg>
+          <span>Continue with Discord</span>
+        </button>
+        <div class="auth-divider"><span>or continue with email</span></div>
         <form data-auth-form data-mode="login">
           <div class="field"><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
           <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" required></div>
           <button class="auth-submit" type="submit">Sign in</button>
           <p class="auth-message" data-auth-message role="status" aria-live="polite"></p>
         </form>
-        <p class="auth-switch">New to Spider Hub? <a href="/register/">Create an account</a></p>
-        <div class="secure-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>Sign-in is handled by Supabase Auth. Spider Hub never sees or stores your password.</div>
-        <a class="back-home" href="/">← Back to Spider Hub</a>
+        <p class="auth-switch">New to Spider Websites? <a href="/register/">Create an account</a></p>
+        <div class="secure-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>Discord authorization and email authentication are handled by your Supabase Auth project. OAuth secrets stay server-side.</div>
+        <a class="back-home" href="/">← Back to Spider Websites</a>
       </div>
     </section>
   </main>
